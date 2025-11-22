@@ -1,0 +1,107 @@
+[
+  {
+    "id": 1,
+    "sender": "alice.chen@example.com",
+    "subject": "Sync: Q3 Review Meeting",
+    "body": "Hi everyone, Let's gather to review Q3 performance. I've booked the main conference room for Tuesday at 10 AM. Please bring your reports.",
+    "timestamp": "2023-11-20T09:00:00Z"
+  },
+  {
+    "id": 2,
+    "sender": "recruiting@example.com",
+    "subject": "Interview Confirmation: John Doe",
+    "body": "Confirming your interview with John Doe for the Senior Dev role tomorrow at 2 PM via Zoom. Please review his resume attached.",
+    "timestamp": "2023-11-21T14:30:00Z"
+  },
+  {
+    "id": 3,
+    "sender": "client.relations@partner.com",
+    "subject": "Coffee Chat?",
+    "body": "Hey, are you free for a quick coffee chat next Wednesday to discuss the new partnership opportunities? Let me know what time works.",
+    "timestamp": "2023-11-19T11:15:00Z"
+  },
+  {
+    "id": 4,
+    "sender": "digest@techcrunch.com",
+    "subject": "Daily Crunch: The biggest AI news",
+    "body": "Today's top stories: OpenAI releases new model, Google updates Bard, and more startup news you need to know.",
+    "timestamp": "2023-11-22T08:00:00Z"
+  },
+  {
+    "id": 5,
+    "sender": "newsletter@morningbrew.com",
+    "subject": "Morning Brew: Markets are up",
+    "body": "Good morning! Here is what is happening in the stock market today. S&P 500 hits record high as tech stocks rally.",
+    "timestamp": "2023-11-21T07:00:00Z"
+  },
+  {
+    "id": 6,
+    "sender": "weekly@css-tricks.com",
+    "subject": "CSS-Tricks Weekly",
+    "body": "This week: A guide to CSS Grid, Flexbox tricks, and new web standards you should know. Check out the tutorials.",
+    "timestamp": "2023-11-18T10:00:00Z"
+  },
+  {
+    "id": 7,
+    "sender": "promo@super-deals.xyz",
+    "subject": "FINAL NOTICE: 90% OFF",
+    "body": "Don't miss out on our closing down sale. Everything must go! Click here to claim your discount immediately.",
+    "timestamp": "2023-11-20T04:20:00Z"
+  },
+  {
+    "id": 8,
+    "sender": "prince.nigeria@wealth.com",
+    "subject": "Business Proposal",
+    "body": "I have a business proposal that will benefit us both. Please reply for details regarding a large sum of funds.",
+    "timestamp": "2023-11-15T12:00:00Z"
+  },
+  {
+    "id": 9,
+    "sender": "boss@company.com",
+    "subject": "Urgent: Q4 Budget Report",
+    "body": "I need the Q4 budget report on my desk by end of day Friday. Please prioritize this over other tasks.",
+    "timestamp": "2023-11-22T09:30:00Z"
+  },
+  {
+    "id": 10,
+    "sender": "compliance@company.com",
+    "subject": "Mandatory Security Training",
+    "body": "Please complete the annual security awareness training by Nov 30th. Failure to complete may result in account suspension.",
+    "timestamp": "2023-11-20T13:00:00Z"
+  },
+  {
+    "id": 11,
+    "sender": "editor@blog.com",
+    "subject": "Article Draft Due",
+    "body": "Just a reminder that your draft for the 'Future of Python' article is due this Wednesday. Let me know if you need an extension.",
+    "timestamp": "2023-11-19T15:45:00Z"
+  },
+  {
+    "id": 12,
+    "sender": "finance@company.com",
+    "subject": "Invoice #4029 Approval",
+    "body": "Please review and approve the attached invoice for software licenses. Due date: Tomorrow. It is pending your sign-off.",
+    "timestamp": "2023-11-21T16:20:00Z"
+  },
+  {
+    "id": 13,
+    "sender": "jira-bot@company.com",
+    "subject": "[JIRA] Update on PROJ-123",
+    "body": "User 'mscott' updated status of PROJ-123 to 'In Progress'. Comment: Started working on the backend API endpoints.",
+    "timestamp": "2023-11-22T10:05:00Z"
+  },
+  {
+    "id": 14,
+    "sender": "team-lead@company.com",
+    "subject": "Frontend Refactor Status",
+    "body": "The frontend refactor is 80% complete. We are on track to merge by Friday. Great work team! Please test the staging build.",
+    "timestamp": "2023-11-21T17:00:00Z"
+  },
+  {
+    "id": 15,
+    "sender": "devops@company.com",
+    "subject": "Deployment Successful: v2.1.0",
+    "body": "Release v2.1.0 has been successfully deployed to production. Monitoring for any anomalies. Logs are available in the dashboard.",
+    "timestamp": "2023-11-22T11:30:00Z"
+  }
+]
