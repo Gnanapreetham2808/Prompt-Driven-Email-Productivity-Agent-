@@ -1,4 +1,5 @@
 import os
+import json
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -96,3 +97,94 @@ async def init_prompts():
 @app.get("/")
 async def root():
     return {"message": "API is running"}
+
+@app.post("/ingest")
+async def ingest_emails():
+    """
+    Ingests emails from mock_inbox.json, analyzes them using OpenAI,
+    and stores the results in Supabase.
+    """
+    if not supabase or not openai_client:
+        raise HTTPException(status_code=500, detail="Services not initialized")
+
+    try:
+        # Load mock emails
+        try:
+            with open("mock_inbox.json", "r") as f:
+                emails = json.load(f)
+        except FileNotFoundError:
+            raise HTTPException(status_code=404, detail="mock_inbox.json not found")
+
+        results = []
+        
+        for email in emails:
+            # 1. Insert email into Supabase
+            email_data = {
+                "sender": email["sender"],
+                "subject": email["subject"],
+                "body": email["body"],
+                "received_at": email["timestamp"],
+                "is_read": False
+            }
+            
+            # Insert and get the new record to get the UUID
+            res = supabase.table("emails").insert(email_data).execute()
+            if not res.data:
+                print(f"Failed to insert email: {email.get('subject')}")
+                continue
+                
+            new_email_id = res.data[0]['id']
+
+            # 2. CRITICAL: Fetch prompts inside the loop
+            # We fetch the latest prompts for every email as requested
+            cat_prompt_res = supabase.table("prompts").select("content").eq("prompt_type", "categorization").execute()
+            action_prompt_res = supabase.table("prompts").select("content").eq("prompt_type", "action_item").execute()
+            
+            # Use fetched content or fallbacks
+            cat_prompt = cat_prompt_res.data[0]['content'] if cat_prompt_res.data else "Categorize this email."
+            action_prompt = action_prompt_res.data[0]['content'] if action_prompt_res.data else "Extract tasks."
+
+            # 3. Analyze with OpenAI
+            system_prompt = f"""
+            You are an email analysis engine.
+            
+            Task 1 (Categorization): {cat_prompt}
+            Task 2 (Action Items): {action_prompt}
+            
+            Output Format: Return a valid JSON object with exactly these keys:
+            - "category": string (e.g., "Meeting", "Newsletter", "Spam", "Task", "Project Update")
+            - "extracted_tasks": list of objects, where each object has "task" (string) and "deadline" (string or null).
+            """
+            
+            try:
+                completion = openai_client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": email["body"]}
+                    ],
+                    response_format={"type": "json_object"}
+                )
+                
+                analysis_content = completion.choices[0].message.content
+                analysis_json = json.loads(analysis_content)
+                
+                # 4. Insert into email_analysis
+                analysis_data = {
+                    "email_id": new_email_id,
+                    "category": analysis_json.get("category"),
+                    "extracted_tasks": analysis_json.get("extracted_tasks"),
+                    # analysis_date defaults to NOW() in DB, but we can send it if needed
+                }
+                
+                supabase.table("email_analysis").insert(analysis_data).execute()
+                results.append({"email_id": new_email_id, "status": "analyzed"})
+                
+            except Exception as ai_error:
+                print(f"AI Analysis failed for email {new_email_id}: {ai_error}")
+                results.append({"email_id": new_email_id, "status": "ingested_only", "error": str(ai_error)})
+
+        return {"message": "Ingestion process completed", "processed_count": len(results), "details": results}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ingestion failed: {str(e)}")
