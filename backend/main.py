@@ -52,6 +52,13 @@ class EmailQuery(BaseModel):
 class PromptContentUpdate(BaseModel):
     content: str
 
+class AgentChatRequest(BaseModel):
+    email_id: str
+    user_query: str
+
+class DraftRequest(BaseModel):
+    email_id: str
+
 # Default Prompts Data
 DEFAULT_PROMPTS = [
     {
@@ -234,5 +241,113 @@ async def get_emails():
         # For simplicity, let's just fetch emails.
         response = supabase.table("emails").select("*, email_analysis(category, extracted_tasks)").order("received_at", desc=True).execute()
         return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/agent/chat")
+async def agent_chat(request: AgentChatRequest):
+    """
+    Chat with the agent about a specific email.
+    """
+    if not supabase or not openai_client:
+        raise HTTPException(status_code=500, detail="Services not initialized")
+
+    try:
+        # 1. Fetch Email Body
+        email_res = supabase.table("emails").select("body, sender, subject").eq("id", request.email_id).execute()
+        if not email_res.data:
+            raise HTTPException(status_code=404, detail="Email not found")
+        
+        email = email_res.data[0]
+        
+        # 2. Fetch System Prompt (Try 'general_agent', fallback to generic)
+        # We can also allow the user to create a 'general_agent' prompt in the UI later.
+        prompt_res = supabase.table("prompts").select("content").eq("prompt_type", "general_agent").execute()
+        
+        if prompt_res.data:
+            system_instruction = prompt_res.data[0]['content']
+        else:
+            system_instruction = "You are a helpful AI assistant. You are analyzing the following email. Answer the user's questions based on the email content."
+
+        # Construct the full system message
+        system_message = f"""
+        {system_instruction}
+
+        --- EMAIL CONTEXT ---
+        From: {email['sender']}
+        Subject: {email['subject']}
+        Body:
+        {email['body']}
+        ---------------------
+        """
+
+        # 3. Call OpenAI
+        completion = openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": request.user_query}
+            ]
+        )
+        
+        return {"response": completion.choices[0].message.content}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/agent/draft")
+async def generate_draft(request: DraftRequest):
+    """
+    Generates a draft reply for an email and saves it to the database.
+    """
+    if not supabase or not openai_client:
+        raise HTTPException(status_code=500, detail="Services not initialized")
+
+    try:
+        # 1. Fetch Email
+        email_res = supabase.table("emails").select("body, sender, subject").eq("id", request.email_id).execute()
+        if not email_res.data:
+            raise HTTPException(status_code=404, detail="Email not found")
+        email = email_res.data[0]
+
+        # 2. Fetch 'auto_reply' Prompt
+        prompt_res = supabase.table("prompts").select("content").eq("prompt_type", "auto_reply").execute()
+        if prompt_res.data:
+            system_instruction = prompt_res.data[0]['content']
+        else:
+            system_instruction = "Draft a professional reply to this email."
+
+        # 3. Call OpenAI
+        system_prompt = f"""
+        {system_instruction}
+        
+        Output Format: Return a valid JSON object with exactly these keys:
+        - "draft_subject": string
+        - "draft_body": string
+        """
+
+        completion = openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"From: {email['sender']}\nSubject: {email['subject']}\nBody:\n{email['body']}"}
+            ],
+            response_format={"type": "json_object"}
+        )
+
+        draft_content = completion.choices[0].message.content
+        draft_json = json.loads(draft_content)
+
+        # 4. Insert into drafts table
+        draft_data = {
+            "email_id": request.email_id,
+            "draft_subject": draft_json.get("draft_subject"),
+            "draft_body": draft_json.get("draft_body")
+        }
+        
+        insert_res = supabase.table("drafts").insert(draft_data).execute()
+        
+        return {"message": "Draft generated successfully", "draft": insert_res.data[0]}
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

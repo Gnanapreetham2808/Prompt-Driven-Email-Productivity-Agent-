@@ -205,6 +205,47 @@
         .email-item:hover {
             background-color: #f9f9f9;
         }
+        
+        /* Chat Styles */
+        .chat-section {
+            margin-top: 2rem;
+            border-top: 1px solid #eee;
+            padding-top: 1rem;
+        }
+        .chat-box {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            height: 200px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #f9f9f9;
+            margin-bottom: 1rem;
+        }
+        .chat-message {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        .chat-message.user {
+            background: #e3f2fd;
+            text-align: right;
+            margin-left: 20%;
+        }
+        .chat-message.agent {
+            background: #fff;
+            border: 1px solid #eee;
+            margin-right: 20%;
+        }
+        .chat-input-area {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .chat-input-area input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -321,9 +362,92 @@
                     ${tasks.map(t => `<li><strong>${t.task}</strong> ${t.deadline ? `(Due: ${t.deadline})` : ''}</li>`).join('')}
                 </ul>
             ` : ''}
+
+            <div class="chat-section">
+                <h3>Chat with Agent</h3>
+                <div id="chat-box-${email.id}" class="chat-box"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input-${email.id}" placeholder="Ask about this email..." onkeypress="if(event.key === 'Enter') sendChat('${email.id}')">
+                    <button class="btn" onclick="sendChat('${email.id}')">Send</button>
+                </div>
+            </div>
+
+            <div class="draft-section" style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                <h3>Draft Reply</h3>
+                <button class="btn" onclick="generateDraft('${email.id}')">✨ Generate Draft Reply</button>
+                <div id="draft-container-${email.id}" style="margin-top: 1rem; display: none;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Subject:</label>
+                    <input type="text" id="draft-subject-${email.id}" style="width: 100%; margin-bottom: 1rem; padding: 0.5rem; box-sizing: border-box;" readonly>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Body:</label>
+                    <textarea id="draft-body-${email.id}" style="width: 100%; height: 150px; padding: 0.5rem; box-sizing: border-box;" readonly></textarea>
+                </div>
+            </div>
         `;
         
         modal.style.display = "block";
+    }
+
+    async function generateDraft(emailId) {
+        const btn = document.querySelector(`button[onclick="generateDraft('${emailId}')"]`);
+        const container = document.getElementById(`draft-container-${emailId}`);
+        const subjectInput = document.getElementById(`draft-subject-${emailId}`);
+        const bodyInput = document.getElementById(`draft-body-${emailId}`);
+        
+        const originalText = btn.innerText;
+        btn.innerText = 'Generating...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(`${API_URL}/agent/draft`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email_id: emailId })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                subjectInput.value = data.draft.draft_subject;
+                bodyInput.value = data.draft.draft_body;
+                container.style.display = 'block';
+            } else {
+                alert('Failed to generate draft');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error generating draft');
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    async function sendChat(emailId) {
+        const input = document.getElementById(`chat-input-${emailId}`);
+        const chatBox = document.getElementById(`chat-box-${emailId}`);
+        const query = input.value.trim();
+        
+        if (!query) return;
+
+        // Add User Message
+        chatBox.innerHTML += `<div class="chat-message user"><strong>You:</strong> ${query}</div>`;
+        input.value = '';
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            const res = await fetch(`${API_URL}/agent/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email_id: emailId, user_query: query })
+            });
+            const data = await res.json();
+            
+            // Add Agent Message
+            chatBox.innerHTML += `<div class="chat-message agent"><strong>Agent:</strong> ${data.response}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } catch (err) {
+            console.error(err);
+            chatBox.innerHTML += `<div class="chat-message agent" style="color: red;">Error: Could not get response.</div>`;
+        }
     }
 
     function closeModal() {
