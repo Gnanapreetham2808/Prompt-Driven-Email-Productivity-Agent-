@@ -49,6 +49,9 @@ class PromptUpdate(BaseModel):
 class EmailQuery(BaseModel):
     query: str
 
+class PromptContentUpdate(BaseModel):
+    content: str
+
 # Default Prompts Data
 DEFAULT_PROMPTS = [
     {
@@ -188,3 +191,48 @@ async def ingest_emails():
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ingestion failed: {str(e)}")
+
+@app.get("/prompts")
+async def get_prompts():
+    """
+    Fetches all system prompts from the database.
+    """
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Supabase client not initialized")
+    
+    try:
+        response = supabase.table("prompts").select("*").order("created_at").execute()
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/prompts/{prompt_id}")
+async def update_prompt(prompt_id: str, update: PromptContentUpdate):
+    """
+    Updates a specific prompt's content.
+    """
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Supabase client not initialized")
+
+    try:
+        response = supabase.table("prompts").update({"content": update.content}).eq("id", prompt_id).execute()
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/emails")
+async def get_emails():
+    """
+    Fetches all emails with their analysis.
+    """
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Supabase client not initialized")
+    
+    try:
+        # Fetch emails and join with analysis if possible, or just fetch emails for now
+        # Supabase-py join syntax can be tricky, let's just fetch emails and analysis separately or use a view if we had one.
+        # For simplicity, let's just fetch emails.
+        response = supabase.table("emails").select("*, email_analysis(category, extracted_tasks)").order("received_at", desc=True).execute()
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

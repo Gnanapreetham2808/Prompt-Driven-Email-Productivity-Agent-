@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Productivity Agent</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 2rem;
+        }
+        .tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+        .tab.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Inbox Styles */
+        .email-list {
+            list-style: none;
+            padding: 0;
+        }
+        .email-item {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .email-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .email-sender {
+            font-weight: bold;
+        }
+        .email-date {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        .email-subject {
+            font-size: 1.2rem;
+            margin: 0.5rem 0;
+            color: #007bff;
+        }
+        .email-body {
+            color: #555;
+            white-space: pre-wrap;
+        }
+        .email-meta {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background: #e0e0e0;
+            margin-right: 0.5rem;
+        }
+        .badge-category {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        /* Agent Brain Styles */
+        .prompt-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .prompt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .prompt-type {
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-save {
+            margin-top: 1rem;
+        }
+        .status-msg {
+            margin-left: 1rem;
+            font-size: 0.9rem;
+            color: green;
+            display: none;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4); 
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+            max-width: 800px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .modal-body-text {
+            white-space: pre-wrap;
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+        .email-item {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .email-item:hover {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Prompt-Driven Email Agent</h1>
+</header>
+
+<div class="container">
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('inbox')">Inbox</div>
+        <div class="tab" onclick="switchTab('brain')">Agent Brain</div>
+    </div>
+
+    <!-- Inbox Tab -->
+    <div id="inbox" class="tab-content active">
+        <div style="margin-bottom: 1rem; text-align: right;">
+            <button class="btn" onclick="ingestEmails()">🔄 Ingest & Analyze New Emails</button>
+        </div>
+        <ul id="email-list" class="email-list">
+            <li style="text-align: center; padding: 2rem;">Loading emails...</li>
+        </ul>
+    </div>
+
+    <!-- Agent Brain Tab -->
+    <div id="brain" class="tab-content">
+        <div id="prompts-container">
+            <p style="text-align: center; padding: 2rem;">Loading prompts...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Email Detail Modal -->
+<div id="emailModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div id="modal-content-body">
+        <!-- Content populated by JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+    const API_URL = 'http://127.0.0.1:8000';
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+
+        if (tabId === 'inbox') loadEmails();
+        if (tabId === 'brain') loadPrompts();
+    }
+
+    async function loadEmails() {
+        try {
+            const res = await fetch(`${API_URL}/emails`);
+            const emails = await res.json();
+            const list = document.getElementById('email-list');
+            list.innerHTML = '';
+
+            if (emails.length === 0) {
+                list.innerHTML = '<li style="text-align: center; padding: 2rem;">No emails found. Click "Ingest" to load mock data.</li>';
+                return;
+            }
+
+            emails.forEach(email => {
+                const analysis = email.email_analysis && email.email_analysis[0] ? email.email_analysis[0] : {};
+                const category = analysis.category || 'Uncategorized';
+                
+                const li = document.createElement('li');
+                li.className = 'email-item';
+                li.onclick = () => openModal(email, analysis); // Pass data to modal
+                
+                li.innerHTML = `
+                    <div class="email-header">
+                        <span class="email-sender">${email.sender}</span>
+                        <span class="email-date">${new Date(email.received_at).toLocaleString()}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 class="email-subject" style="margin: 0.5rem 0; font-size: 1.1rem;">${email.subject}</h3>
+                        <span class="badge badge-category">${category}</span>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        } catch (err) {
+            console.error(err);
+            document.getElementById('email-list').innerHTML = '<li style="color: red; text-align: center;">Error loading emails. Make sure backend is running.</li>';
+        }
+    }
+
+    function openModal(email, analysis) {
+        const modal = document.getElementById("emailModal");
+        const content = document.getElementById("modal-content-body");
+        const tasks = analysis.extracted_tasks || [];
+        
+        content.innerHTML = `
+            <div class="modal-header">
+                <h2>${email.subject}</h2>
+                <p><strong>From:</strong> ${email.sender}</p>
+                <p><strong>Date:</strong> ${new Date(email.received_at).toLocaleString()}</p>
+                <p><strong>Category:</strong> <span class="badge badge-category">${analysis.category || 'Uncategorized'}</span></p>
+            </div>
+            
+            <h3>Body</h3>
+            <div class="modal-body-text">${email.body}</div>
+            
+            ${tasks.length > 0 ? `
+                <h3>Extracted Tasks</h3>
+                <ul>
+                    ${tasks.map(t => `<li><strong>${t.task}</strong> ${t.deadline ? `(Due: ${t.deadline})` : ''}</li>`).join('')}
+                </ul>
+            ` : ''}
+        `;
+        
+        modal.style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById("emailModal").style.display = "none";
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+        const modal = document.getElementById("emailModal");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    async function ingestEmails() {
+        const btn = document.querySelector('button[onclick="ingestEmails()"]');
+        const originalText = btn.innerText;
+        btn.innerText = 'Processing...';
+        btn.disabled = true;
+        
+        try {
+            const res = await fetch(`${API_URL}/ingest`, { method: 'POST' });
+            const data = await res.json();
+            alert(`Ingestion Complete: ${data.message}`);
+            loadEmails();
+        } catch (err) {
+            alert('Error ingesting emails');
+            console.error(err);
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    async function loadPrompts() {
+        try {
+            const res = await fetch(`${API_URL}/prompts`);
+            const prompts = await res.json();
+            const container = document.getElementById('prompts-container');
+            container.innerHTML = '';
+
+            prompts.forEach(prompt => {
+                const div = document.createElement('div');
+                div.className = 'prompt-card';
+                div.innerHTML = `
+                    <div class="prompt-header">
+                        <span class="prompt-type">${prompt.prompt_type.replace('_', ' ')}</span>
+                        <span style="color: #888; font-size: 0.8rem;">ID: ${prompt.id}</span>
+                    </div>
+                    <textarea id="prompt-${prompt.id}">${prompt.content}</textarea>
+                    <button class="btn btn-save" onclick="savePrompt('${prompt.id}')">Save Prompt</button>
+                    <span id="msg-${prompt.id}" class="status-msg">Saved!</span>
+                `;
+                container.appendChild(div);
+            });
+        } catch (err) {
+            console.error(err);
+            document.getElementById('prompts-container').innerHTML = '<p style="color: red; text-align: center;">Error loading prompts.</p>';
+        }
+    }
+
+    async function savePrompt(id) {
+        const content = document.getElementById(`prompt-${id}`).value;
+        const msg = document.getElementById(`msg-${id}`);
+        
+        try {
+            const res = await fetch(`${API_URL}/prompts/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: content })
+            });
+            
+            if (res.ok) {
+                msg.style.display = 'inline';
+                setTimeout(() => msg.style.display = 'none', 2000);
+            } else {
+                alert('Failed to save prompt');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error saving prompt');
+        }
+    }
+
+    // Initial load
+    loadEmails();
+</script>
+
+</body>
+</html>
