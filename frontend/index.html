@@ -3,538 +3,671 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Productivity Agent</title>
+    <title>Smart Email Agent</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 1rem;
-            text-align: center;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid #ddd;
-            margin-bottom: 2rem;
-        }
-        .tab {
-            padding: 1rem 2rem;
-            cursor: pointer;
-            font-weight: bold;
-            color: #666;
-            border-bottom: 2px solid transparent;
-            margin-bottom: -2px;
-        }
-        .tab.active {
-            color: #007bff;
-            border-bottom-color: #007bff;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
         
-        /* Inbox Styles */
-        .email-list {
-            list-style: none;
-            padding: 0;
-        }
-        .email-item {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .email-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-        .email-sender {
-            font-weight: bold;
-        }
-        .email-date {
-            color: #888;
-            font-size: 0.9rem;
-        }
-        .email-subject {
-            font-size: 1.2rem;
-            margin: 0.5rem 0;
-            color: #007bff;
-        }
-        .email-body {
-            color: #555;
-            white-space: pre-wrap;
-        }
-        .email-meta {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #eee;
-            font-size: 0.9rem;
-        }
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            background: #e0e0e0;
-            margin-right: 0.5rem;
-        }
-        .badge-category {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
 
-        /* Agent Brain Styles */
-        .prompt-card {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .prompt-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        .prompt-type {
-            font-size: 1.1rem;
-            font-weight: bold;
-            text-transform: capitalize;
-        }
-        textarea {
-            width: 100%;
-            height: 150px;
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-family: monospace;
-            resize: vertical;
-            box-sizing: border-box;
-        }
-        .btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        .btn:hover {
-            background-color: #0056b3;
-        }
-        .btn-save {
-            margin-top: 1rem;
-        }
-        .status-msg {
-            margin-left: 1rem;
-            font-size: 0.9rem;
-            color: green;
-            display: none;
-        }
+        /* Smooth fade in */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Modal Styles */
-        .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 1; 
-            left: 0;
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
-            background-color: rgba(0,0,0,0.4); 
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 10% auto; 
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; 
-            max-width: 800px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .modal-header {
-            border-bottom: 1px solid #eee;
-            padding-bottom: 1rem;
-            margin-bottom: 1rem;
-        }
-        .modal-body-text {
-            white-space: pre-wrap;
-            background: #f9f9f9;
-            padding: 1rem;
-            border-radius: 4px;
-            border: 1px solid #eee;
-        }
-        .email-item {
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .email-item:hover {
-            background-color: #f9f9f9;
-        }
-        
-        /* Chat Styles */
-        .chat-section {
-            margin-top: 2rem;
-            border-top: 1px solid #eee;
-            padding-top: 1rem;
-        }
-        .chat-box {
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            height: 200px;
-            overflow-y: auto;
-            padding: 1rem;
-            background: #f9f9f9;
-            margin-bottom: 1rem;
-        }
-        .chat-message {
-            margin-bottom: 0.5rem;
-            padding: 0.5rem;
-            border-radius: 4px;
-        }
-        .chat-message.user {
-            background: #e3f2fd;
-            text-align: right;
-            margin-left: 20%;
-        }
-        .chat-message.agent {
-            background: #fff;
-            border: 1px solid #eee;
-            margin-right: 20%;
-        }
-        .chat-input-area {
-            display: flex;
-            gap: 0.5rem;
-        }
-        .chat-input-area input {
-            flex: 1;
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
+        /* Loader */
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 h-screen flex flex-col overflow-hidden text-slate-800">
 
-<header>
-    <h1>Prompt-Driven Email Agent</h1>
-</header>
-
-<div class="container">
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab('inbox')">Inbox</div>
-        <div class="tab" onclick="switchTab('brain')">Agent Brain</div>
-    </div>
-
-    <!-- Inbox Tab -->
-    <div id="inbox" class="tab-content active">
-        <div style="margin-bottom: 1rem; text-align: right;">
-            <button class="btn" onclick="ingestEmails()">🔄 Ingest & Analyze New Emails</button>
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 shadow-sm z-10">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 p-2 rounded-lg text-white">
+                <i data-lucide="bot" class="w-6 h-6"></i>
+            </div>
+            <h1 class="font-semibold text-xl tracking-tight text-slate-800 flex items-center gap-3">Email Agent <span id="unread-badge" class="hidden text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">0 Unread</span></h1>
         </div>
-        <ul id="email-list" class="email-list">
-            <li style="text-align: center; padding: 2rem;">Loading emails...</li>
-        </ul>
-    </div>
-
-    <!-- Agent Brain Tab -->
-    <div id="brain" class="tab-content">
-        <div id="prompts-container">
-            <p style="text-align: center; padding: 2rem;">Loading prompts...</p>
-        </div>
-    </div>
-</div>
-
-<!-- Email Detail Modal -->
-<div id="emailModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <div id="modal-content-body">
-        <!-- Content populated by JS -->
-    </div>
-  </div>
-</div>
-
-<script>
-    const API_URL = 'http://127.0.0.1:8000';
-
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         
-        document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
-        document.getElementById(tabId).classList.add('active');
+        <nav class="flex gap-2 items-center bg-gray-100 p-1 rounded-lg">
+            <button onclick="switchTab('inbox')" id="tab-inbox" class="px-4 py-2 rounded-md text-sm font-medium transition-all bg-white text-blue-600 shadow-sm">
+                <i data-lucide="inbox" class="w-4 h-4 inline mr-2"></i>Inbox
+            </button>
+            <button onclick="switchTab('brain')" id="tab-brain" class="px-4 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-all">
+                <i data-lucide="brain-circuit" class="w-4 h-4 inline mr-2"></i>Agent Brain
+            </button>
+            <select onchange="setLanguage(this.value)" class="text-xs px-2 py-1 rounded bg-white border border-gray-300">
+                <option value="en">EN</option>
+                <option value="es">ES</option>
+                <option value="fr">FR</option>
+                <option value="de">DE</option>
+                <option value="pt">PT</option>
+            </select>
+        </nav>
+    </header>
 
-        if (tabId === 'inbox') loadEmails();
-        if (tabId === 'brain') loadPrompts();
-    }
+    <!-- Main Content Area -->
+    <main class="flex-1 flex overflow-hidden relative">
+        
+        <!-- View: Inbox -->
+        <div id="view-inbox" class="w-full h-full flex transition-opacity duration-300">
+            
+            <!-- Sidebar: Email List -->
+            <div class="w-full md:w-1/3 lg:w-96 bg-white border-r border-gray-200 flex flex-col">
+                <div class="p-4 border-b border-gray-100 flex flex-col gap-3 bg-gray-50/50">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Messages</span>
+                        <div class="flex items-center gap-2">
+                            <input id="search-input" type="text" placeholder="Search..." class="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" onkeypress="if(event.key==='Enter') runSearch()" />
+                            <select id="filter-category" class="text-xs px-2 py-1 border border-gray-300 rounded bg-white" onchange="applyFilters()">
+                                <option value="">All Categories</option>
+                                <option>Meeting</option>
+                                <option>Newsletter</option>
+                                <option>Spam</option>
+                                <option>Task</option>
+                                <option>Project Update</option>
+                            </select>
+                            <button onclick="ingestEmails()" id="btn-ingest" class="text-xs flex items-center gap-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-full transition-colors shadow-sm">
+                                <i data-lucide="refresh-cw" class="w-3 h-3"></i> Sync
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-xs">
+                        <button id="filter-unread" onclick="toggleUnread()" class="px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-100">Unread</button>
+                        <button id="filter-starred" onclick="toggleStarred()" class="px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-100">Starred</button>
+                        <button onclick="clearFilters()" class="px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-100">Clear</button>
+                    </div>
+                </div>
+                <div id="email-list" class="flex-1 overflow-y-auto p-2 space-y-2">
+                    <!-- Email Items Injected Here -->
+                    <div class="flex flex-col items-center justify-center h-64 text-gray-400">
+                        <div class="loader mb-2"></div>
+                        <span class="text-sm">Syncing emails...</span>
+                    </div>
+                </div>
+            </div>
 
-    async function loadEmails() {
-        try {
-            const res = await fetch(`${API_URL}/emails`);
-            const emails = await res.json();
+            <!-- Main Area: Email Detail & Agent -->
+            <div class="hidden md:flex flex-1 flex-col bg-gray-50 relative" id="email-detail-container">
+                <!-- Empty State -->
+                <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+                    <i data-lucide="mail-open" class="w-16 h-16 mb-4 opacity-20"></i>
+                    <p class="text-lg font-medium">Select an email to view details</p>
+                </div>
+
+                <!-- Content -->
+                <div id="email-content" class="hidden flex-col h-full fade-in">
+                    <!-- Email Header -->
+                    <div class="bg-white border-b border-gray-200 p-6 shadow-sm">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h2 id="detail-subject" class="text-2xl font-semibold text-slate-900 mb-1"></h2>
+                                <div class="flex items-center gap-2 text-sm text-gray-500">
+                                    <span class="font-medium text-slate-700" id="detail-sender"></span>
+                                    <span>&bull;</span>
+                                    <span id="detail-date"></span>
+                                </div>
+                            </div>
+                            <span id="detail-category" class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600"></span>
+                        </div>
+                        
+                        <!-- Action Items extracted -->
+                        <div id="detail-tasks" class="hidden mb-2">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                <i data-lucide="check-square" class="w-3 h-3"></i> Action Items
+                            </h4>
+                            <div id="tasks-list" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable Body -->
+                    <div class="flex-1 overflow-hidden flex flex-col lg:flex-row">
+                        <!-- Email Body Text -->
+                        <div class="flex-1 overflow-y-auto p-6 text-slate-600 leading-relaxed whitespace-pre-wrap border-b lg:border-b-0 lg:border-r border-gray-200 bg-white" id="detail-body"></div>
+
+                        <!-- Agent Sidebar (Chat & Draft) -->
+                        <div class="w-full lg:w-96 bg-gray-50 flex flex-col border-l border-gray-200">
+                            
+                            <!-- Tabs for Agent -->
+                            <div class="flex border-b border-gray-200 bg-white">
+                                <button onclick="switchAgentTab('chat')" id="agent-tab-chat" class="flex-1 py-3 text-sm font-medium text-blue-600 border-b-2 border-blue-600 bg-blue-50/50">
+                                    AI Assistant
+                                </button>
+                                <button onclick="switchAgentTab('draft')" id="agent-tab-draft" class="flex-1 py-3 text-sm font-medium text-gray-500 hover:text-gray-700">
+                                    Draft Reply
+                                </button>
+                            </div>
+
+                            <!-- Chat Panel -->
+                            <div id="panel-chat" class="flex-1 flex flex-col overflow-hidden">
+                                <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3">
+                                    <div class="bg-white p-3 rounded-lg rounded-tl-none shadow-sm border border-gray-200 text-sm text-gray-600">
+                                        Hi! I've analyzed this email. Ask me to summarize it or extract specific details.
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-white border-t border-gray-200">
+                                    <div class="relative">
+                                        <input type="text" id="chat-input" placeholder="Ask about this email..." 
+                                            class="w-full pl-4 pr-10 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-shadow"
+                                            onkeypress="if(event.key === 'Enter') sendChat()">
+                                        <button onclick="sendChat()" class="absolute right-2 top-2 text-blue-600 hover:text-blue-700">
+                                            <i data-lucide="send" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Draft Panel -->
+                            <div id="panel-draft" class="hidden flex-1 flex flex-col overflow-hidden p-4">
+                                <div class="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col overflow-hidden">
+                                    <div class="bg-gray-50 px-3 py-2 border-b border-gray-200 flex justify-between items-center">
+                                        <span class="text-xs font-semibold text-gray-500">DRAFT PREVIEW</span>
+                                        <button onclick="generateDraft()" id="btn-gen-draft" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 transition-colors flex items-center gap-1">
+                                            <i data-lucide="sparkles" class="w-3 h-3"></i> Auto-Generate
+                                        </button>
+                                    </div>
+                                    <div class="p-3 flex-1 flex flex-col gap-3 overflow-y-auto">
+                                        <div>
+                                            <label class="block text-xs text-gray-400 font-medium mb-1">Subject</label>
+                                            <input type="text" id="draft-subject" class="w-full text-sm font-medium text-slate-800 border-b border-gray-200 pb-1 focus:outline-none focus:border-blue-400 placeholder-gray-300" placeholder="Subject line...">
+                                        </div>
+                                        <div class="flex-1">
+                                            <label class="block text-xs text-gray-400 font-medium mb-1">Body</label>
+                                            <textarea id="draft-body" class="w-full h-full resize-none text-sm text-slate-600 leading-relaxed focus:outline-none placeholder-gray-300 font-mono" placeholder="Generated draft will appear here..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 text-center">
+                                    <span class="text-xs text-gray-400 flex items-center justify-center gap-1">
+                                        <i data-lucide="shield-check" class="w-3 h-3"></i> Drafts are saved locally, never sent.
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Agent Brain -->
+        <div id="view-brain" class="hidden w-full h-full overflow-y-auto bg-gray-50 p-6 md:p-10">
+            <div class="max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-slate-900">Agent Brain Configuration</h2>
+                    <p class="text-slate-500 mt-1">Modify the system prompts below to change how the AI analyzes emails and drafts replies.</p>
+                </div>
+                
+                <div id="prompts-container" class="space-y-6">
+                    <div class="flex justify-center py-12">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 text-white px-4 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-50">
+        <i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i>
+        <span id="toast-message" class="text-sm font-medium">Operation successful</span>
+    </div>
+
+    <script>
+        // --- State Management ---
+        const API_URL = 'http://127.0.0.1:8000';
+        let currentEmailId = null;
+        let activeAgentTab = 'chat';
+        let selectedLanguage = 'en';
+
+        // --- Icons ---
+        lucide.createIcons();
+
+        // --- Navigation ---
+        function switchTab(tab) {
+            const tabs = ['inbox', 'brain'];
+            tabs.forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-all';
+            });
+
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            if(tab === 'inbox') document.getElementById(`view-${tab}`).classList.add('flex');
+            
+            document.getElementById(`tab-${tab}`).className = 'px-4 py-2 rounded-md text-sm font-medium bg-white text-blue-600 shadow-sm transition-all';
+
+            if (tab === 'inbox') loadEmails();
+            if (tab === 'brain') loadPrompts();
+        }
+
+        function switchAgentTab(tab) {
+            activeAgentTab = tab;
+            const tabs = ['chat', 'draft'];
+            tabs.forEach(t => {
+                document.getElementById(`panel-${t}`).classList.add('hidden');
+                document.getElementById(`agent-tab-${t}`).className = 'flex-1 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors border-b border-transparent';
+            });
+            document.getElementById(`panel-${tab}`).classList.remove('hidden');
+            document.getElementById(`agent-tab-${tab}`).className = 'flex-1 py-3 text-sm font-medium text-blue-600 border-b-2 border-blue-600 bg-blue-50/50 transition-colors';
+        }
+
+        // --- Inbox Logic ---
+        let filterState = { category: null, unread: null, starred: null, search: null };
+
+        async function updateUnreadBadge() {
+            try {
+                const res = await fetch(`${API_URL}/emails/unread-count`);
+                const data = await res.json();
+                const badge = document.getElementById('unread-badge');
+                if (data.unread > 0) {
+                    badge.textContent = `${data.unread} Unread`;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            } catch (e) { /* silent */ }
+        }
+
+        async function loadEmails() {
             const list = document.getElementById('email-list');
-            list.innerHTML = '';
+            try {
+                let endpoint = `${API_URL}/emails`;
+                if (filterState.category !== null || filterState.unread !== null || filterState.starred !== null) {
+                    const params = new URLSearchParams();
+                    if (filterState.category) params.append('category', filterState.category);
+                    if (filterState.unread !== null) params.append('unread', filterState.unread);
+                    if (filterState.starred !== null) params.append('starred', filterState.starred);
+                    endpoint = `${API_URL}/emails/filter?${params.toString()}`;
+                }
+                const res = await fetch(endpoint);
+                const emails = await res.json();
+                list.innerHTML = '';
 
-            if (emails.length === 0) {
-                list.innerHTML = '<li style="text-align: center; padding: 2rem;">No emails found. Click "Ingest" to load mock data.</li>';
-                return;
+                if (emails.length === 0) {
+                    list.innerHTML = `
+                        <div class="text-center p-8 text-gray-400">
+                            <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                            <p class="text-sm">Inbox is empty.</p>
+                        </div>`;
+                    lucide.createIcons();
+                    return;
+                }
+
+                emails.forEach(email => {
+                    const analysis = email.email_analysis && email.email_analysis[0] ? email.email_analysis[0] : {};
+                    const category = analysis.category || 'Uncategorized';
+                    const date = new Date(email.received_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    
+                    // Style badge based on category
+                    let badgeColor = 'bg-gray-100 text-gray-600';
+                    if(category.toLowerCase().includes('urgent')) badgeColor = 'bg-red-100 text-red-700';
+                    if(category.toLowerCase().includes('meeting')) badgeColor = 'bg-purple-100 text-purple-700';
+                    if(category.toLowerCase().includes('task')) badgeColor = 'bg-blue-100 text-blue-700';
+
+                    const el = document.createElement('div');
+                    const starred = email.is_starred ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-400';
+                    el.className = 'email-item p-4 border-b border-gray-100 cursor-pointer hover:bg-blue-50 transition-colors group relative';
+                    el.onclick = () => selectEmail(email, analysis, el);
+                    el.innerHTML = `
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="font-semibold text-sm text-slate-800 truncate pr-2">${email.sender}</span>
+                            <span class="flex items-center gap-2">
+                                <button onclick="event.stopPropagation(); toggleStar('${email.id}', ${!!email.is_starred})" class="star-btn" title="Star">
+                                    <i data-lucide="star" class="w-4 h-4 ${starred}"></i>
+                                </button>
+                                <span class="text-xs text-gray-400 whitespace-nowrap">${date}</span>
+                            </span>
+                        </div>
+                        <div class="text-sm font-medium text-slate-700 mb-1 truncate">${email.subject}</div>
+                        <div class="flex items-center gap-2">
+                             <span class="text-xs px-2 py-0.5 rounded-full ${badgeColor}">${category}</span>
+                             ${email.attachments && email.attachments.length > 0 ? `<i data-lucide="paperclip" class="w-3 h-3 text-gray-400"></i>` : ''}
+                        </div>
+                    `;
+                    list.appendChild(el);
+                });
+                lucide.createIcons();
+                updateUnreadBadge();
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to load emails', 'error');
             }
-
-            emails.forEach(email => {
-                const analysis = email.email_analysis && email.email_analysis[0] ? email.email_analysis[0] : {};
-                const category = analysis.category || 'Uncategorized';
-                
-                const li = document.createElement('li');
-                li.className = 'email-item';
-                li.onclick = () => openModal(email, analysis); // Pass data to modal
-                
-                li.innerHTML = `
-                    <div class="email-header">
-                        <span class="email-sender">${email.sender}</span>
-                        <span class="email-date">${new Date(email.received_at).toLocaleString()}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h3 class="email-subject" style="margin: 0.5rem 0; font-size: 1.1rem;">${email.subject}</h3>
-                        <span class="badge badge-category">${category}</span>
-                    </div>
-                `;
-                list.appendChild(li);
-            });
-        } catch (err) {
-            console.error(err);
-            document.getElementById('email-list').innerHTML = '<li style="color: red; text-align: center;">Error loading emails. Make sure backend is running.</li>';
         }
-    }
 
-    function openModal(email, analysis) {
-        const modal = document.getElementById("emailModal");
-        const content = document.getElementById("modal-content-body");
-        const tasks = analysis.extracted_tasks || [];
-        
-        content.innerHTML = `
-            <div class="modal-header">
-                <h2>${email.subject}</h2>
-                <p><strong>From:</strong> ${email.sender}</p>
-                <p><strong>Date:</strong> ${new Date(email.received_at).toLocaleString()}</p>
-                <p><strong>Category:</strong> <span class="badge badge-category">${analysis.category || 'Uncategorized'}</span></p>
-            </div>
-            
-            <h3>Body</h3>
-            <div class="modal-body-text">${email.body}</div>
-            
-            ${tasks.length > 0 ? `
-                <h3>Extracted Tasks</h3>
-                <ul>
-                    ${tasks.map(t => `<li><strong>${t.task}</strong> ${t.deadline ? `(Due: ${t.deadline})` : ''}</li>`).join('')}
-                </ul>
-            ` : ''}
-
-            <div class="chat-section">
-                <h3>Chat with Agent</h3>
-                <div id="chat-box-${email.id}" class="chat-box"></div>
-                <div class="chat-input-area">
-                    <input type="text" id="chat-input-${email.id}" placeholder="Ask about this email..." onkeypress="if(event.key === 'Enter') sendChat('${email.id}')">
-                    <button class="btn" onclick="sendChat('${email.id}')">Send</button>
-                </div>
-            </div>
-
-            <div class="draft-section" style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
-                <h3>Draft Reply</h3>
-                <button class="btn" onclick="generateDraft('${email.id}')">✨ Generate Draft Reply</button>
-                <div id="draft-container-${email.id}" style="margin-top: 1rem; display: none;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Subject:</label>
-                    <input type="text" id="draft-subject-${email.id}" style="width: 100%; margin-bottom: 1rem; padding: 0.5rem; box-sizing: border-box;" readonly>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Body:</label>
-                    <textarea id="draft-body-${email.id}" style="width: 100%; height: 150px; padding: 0.5rem; box-sizing: border-box;" readonly></textarea>
-                </div>
-            </div>
-        `;
-        
-        modal.style.display = "block";
-    }
-
-    async function generateDraft(emailId) {
-        const btn = document.querySelector(`button[onclick="generateDraft('${emailId}')"]`);
-        const container = document.getElementById(`draft-container-${emailId}`);
-        const subjectInput = document.getElementById(`draft-subject-${emailId}`);
-        const bodyInput = document.getElementById(`draft-body-${emailId}`);
-        
-        const originalText = btn.innerText;
-        btn.innerText = 'Generating...';
-        btn.disabled = true;
-
-        try {
-            const res = await fetch(`${API_URL}/agent/draft`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email_id: emailId })
-            });
-            const data = await res.json();
-            
-            if (res.ok) {
-                subjectInput.value = data.draft.draft_subject;
-                bodyInput.value = data.draft.draft_body;
-                container.style.display = 'block';
-            } else {
-                alert('Failed to generate draft');
-            }
-        } catch (err) {
-            console.error(err);
-            alert('Error generating draft');
-        } finally {
-            btn.innerText = originalText;
-            btn.disabled = false;
+        async function runSearch() {
+            const q = document.getElementById('search-input').value.trim();
+            if(!q) { filterState.search = null; loadEmails(); return; }
+            try {
+                const res = await fetch(`${API_URL}/emails/search?q=${encodeURIComponent(q)}`);
+                const emails = await res.json();
+                const list = document.getElementById('email-list');
+                list.innerHTML='';
+                emails.forEach(email => {
+                    const analysis = email.email_analysis && email.email_analysis[0] ? email.email_analysis[0] : {};
+                    const category = analysis.category || 'Uncategorized';
+                    const date = new Date(email.received_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    let badgeColor = 'bg-gray-100 text-gray-600';
+                    if(category.toLowerCase().includes('urgent')) badgeColor = 'bg-red-100 text-red-700';
+                    if(category.toLowerCase().includes('meeting')) badgeColor = 'bg-purple-100 text-purple-700';
+                    if(category.toLowerCase().includes('task')) badgeColor = 'bg-blue-100 text-blue-700';
+                    const el = document.createElement('div');
+                    const starred = email.is_starred ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-400';
+                    el.className = 'email-item p-4 border-b border-gray-100 cursor-pointer hover:bg-blue-50 transition-colors group relative';
+                    el.onclick = () => selectEmail(email, analysis, el);
+                    el.innerHTML = `
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="font-semibold text-sm text-slate-800 truncate pr-2">${email.sender}</span>
+                            <span class="flex items-center gap-2">
+                                <button onclick="event.stopPropagation(); toggleStar('${email.id}', ${!!email.is_starred})" class="star-btn" title="Star">
+                                    <i data-lucide="star" class="w-4 h-4 ${starred}"></i>
+                                </button>
+                                <span class="text-xs text-gray-400 whitespace-nowrap">${date}</span>
+                            </span>
+                        </div>
+                        <div class="text-sm font-medium text-slate-700 mb-1 truncate">${email.subject}</div>
+                        <div class="flex items-center gap-2">
+                             <span class="text-xs px-2 py-0.5 rounded-full ${badgeColor}">${category}</span>
+                             ${email.attachments && email.attachments.length > 0 ? `<i data-lucide="paperclip" class="w-3 h-3 text-gray-400"></i>` : ''}
+                        </div>`;
+                    list.appendChild(el);
+                });
+                lucide.createIcons();
+            } catch(e){ showToast('Search failed','error'); }
         }
-    }
 
-    async function sendChat(emailId) {
-        const input = document.getElementById(`chat-input-${emailId}`);
-        const chatBox = document.getElementById(`chat-box-${emailId}`);
-        const query = input.value.trim();
-        
-        if (!query) return;
-
-        // Add User Message
-        chatBox.innerHTML += `<div class="chat-message user"><strong>You:</strong> ${query}</div>`;
-        input.value = '';
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        try {
-            const res = await fetch(`${API_URL}/agent/chat`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email_id: emailId, user_query: query })
-            });
-            const data = await res.json();
-            
-            // Add Agent Message
-            chatBox.innerHTML += `<div class="chat-message agent"><strong>Agent:</strong> ${data.response}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        } catch (err) {
-            console.error(err);
-            chatBox.innerHTML += `<div class="chat-message agent" style="color: red;">Error: Could not get response.</div>`;
-        }
-    }
-
-    function closeModal() {
-        document.getElementById("emailModal").style.display = "none";
-    }
-
-    // Close modal when clicking outside of it
-    window.onclick = function(event) {
-        const modal = document.getElementById("emailModal");
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-
-    async function ingestEmails() {
-        const btn = document.querySelector('button[onclick="ingestEmails()"]');
-        const originalText = btn.innerText;
-        btn.innerText = 'Processing...';
-        btn.disabled = true;
-        
-        try {
-            const res = await fetch(`${API_URL}/ingest`, { method: 'POST' });
-            const data = await res.json();
-            alert(`Ingestion Complete: ${data.message}`);
+        function applyFilters(){
+            const cat = document.getElementById('filter-category').value;
+            filterState.category = cat || null;
             loadEmails();
-        } catch (err) {
-            alert('Error ingesting emails');
-            console.error(err);
-        } finally {
-            btn.innerText = originalText;
-            btn.disabled = false;
         }
-    }
-
-    async function loadPrompts() {
-        try {
-            const res = await fetch(`${API_URL}/prompts`);
-            const prompts = await res.json();
-            const container = document.getElementById('prompts-container');
-            container.innerHTML = '';
-
-            prompts.forEach(prompt => {
-                const div = document.createElement('div');
-                div.className = 'prompt-card';
-                div.innerHTML = `
-                    <div class="prompt-header">
-                        <span class="prompt-type">${prompt.prompt_type.replace('_', ' ')}</span>
-                        <span style="color: #888; font-size: 0.8rem;">ID: ${prompt.id}</span>
-                    </div>
-                    <textarea id="prompt-${prompt.id}">${prompt.content}</textarea>
-                    <button class="btn btn-save" onclick="savePrompt('${prompt.id}')">Save Prompt</button>
-                    <span id="msg-${prompt.id}" class="status-msg">Saved!</span>
-                `;
-                container.appendChild(div);
-            });
-        } catch (err) {
-            console.error(err);
-            document.getElementById('prompts-container').innerHTML = '<p style="color: red; text-align: center;">Error loading prompts.</p>';
+        function toggleUnread(){
+            filterState.unread = filterState.unread === true ? null : true;
+            loadEmails();
         }
-    }
+        function toggleStarred(){
+            filterState.starred = filterState.starred === true ? null : true;
+            loadEmails();
+        }
+        function clearFilters(){ filterState={category:null, unread:null, starred:null, search:null}; document.getElementById('filter-category').value=''; loadEmails(); }
 
-    async function savePrompt(id) {
-        const content = document.getElementById(`prompt-${id}`).value;
-        const msg = document.getElementById(`msg-${id}`);
-        
-        try {
-            const res = await fetch(`${API_URL}/prompts/${id}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: content })
-            });
+        async function toggleStar(id, currently){
+            try {
+                const endpoint = currently ? 'unstar' : 'star';
+                await fetch(`${API_URL}/emails/${id}/${endpoint}`, { method: 'POST' });
+                loadEmails();
+            } catch(e){ showToast('Star toggle failed','error'); }
+        }
+
+        async function ingestEmails() {
+            const btn = document.getElementById('btn-ingest');
+            const icon = btn.querySelector('i');
             
-            if (res.ok) {
-                msg.style.display = 'inline';
-                setTimeout(() => msg.style.display = 'none', 2000);
-            } else {
-                alert('Failed to save prompt');
+            icon.classList.add('animate-spin');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/ingest`, { method: 'POST' });
+                const data = await res.json();
+                showToast(data.message || 'Ingestion complete');
+                loadEmails();
+            } catch (err) {
+                showToast('Ingestion failed', 'error');
+            } finally {
+                icon.classList.remove('animate-spin');
+                btn.disabled = false;
             }
-        } catch (err) {
-            console.error(err);
-            alert('Error saving prompt');
         }
-    }
 
-    // Initial load
-    loadEmails();
-</script>
+        // --- Email Detail Logic ---
+        function selectEmail(email, analysis, el) {
+            currentEmailId = email.id;
+            
+            // Highlight selected
+            document.querySelectorAll('.email-item').forEach(i => i.classList.remove('bg-blue-50', 'border-l-4', 'border-blue-500'));
+            el.classList.add('bg-blue-50', 'border-l-4', 'border-blue-500');
 
+            // Show content area
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('email-content').classList.remove('hidden');
+            document.getElementById('email-content').classList.add('flex');
+
+            // Populate Fields
+            document.getElementById('detail-subject').innerText = email.subject;
+            document.getElementById('detail-sender').innerText = email.sender;
+            document.getElementById('detail-date').innerText = new Date(email.received_at).toLocaleString();
+            document.getElementById('detail-body').innerText = email.body;
+            document.getElementById('detail-category').innerText = analysis.category || 'Uncategorized';
+
+            // Tasks (add checkbox + persistence)
+            const tasksContainer = document.getElementById('detail-tasks');
+            const tasksList = document.getElementById('tasks-list');
+            tasksList.innerHTML = '';
+            
+            if (analysis.extracted_tasks && analysis.extracted_tasks.length > 0) {
+                tasksContainer.classList.remove('hidden');
+                analysis.extracted_tasks.forEach(t => {
+                    const taskEl = document.createElement('div');
+                    taskEl.className = 'bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs px-2 py-1.5 rounded flex items-center gap-2';
+                    const checked = t.completed ? 'checked' : '';
+                    taskEl.innerHTML = `<input type="checkbox" ${checked} onchange="toggleTaskCompletion('${email.id}', '${t.task}')" class="accent-yellow-600"> <span class="font-medium">${t.task}</span> ${t.deadline ? `<span class="bg-white px-1 rounded text-yellow-600 border border-yellow-100">${t.deadline}</span>` : ''}`;
+                    tasksList.appendChild(taskEl);
+                });
+            } else {
+                tasksContainer.classList.add('hidden');
+            }
+
+            // Reset Chat & Draft
+            document.getElementById('chat-messages').innerHTML = `
+                <div class="bg-white p-3 rounded-lg rounded-tl-none shadow-sm border border-gray-200 text-sm text-gray-600">
+                    Hi! I've analyzed this email. Ask me to summarize it or extract specific details.
+                </div>
+            `;
+            document.getElementById('draft-subject').value = '';
+            document.getElementById('draft-body').value = '';
+            
+            // Switch to chat by default
+            switchAgentTab('chat');
+        }
+
+        // --- Agent Chat Logic ---
+        async function sendChat() {
+            if (!currentEmailId) return;
+            const input = document.getElementById('chat-input');
+            const query = input.value.trim();
+            if(!query) return;
+
+            // UI: User Message
+            const chatBox = document.getElementById('chat-messages');
+            chatBox.innerHTML += `
+                <div class="flex justify-end fade-in">
+                    <div class="bg-blue-600 text-white p-3 rounded-lg rounded-tr-none shadow-md text-sm max-w-[85%]">
+                        ${query}
+                    </div>
+                </div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const res = await fetch(`${API_URL}/agent/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email_id: currentEmailId, user_query: query, language: selectedLanguage })
+                });
+                const data = await res.json();
+
+                // UI: Agent Message
+                chatBox.innerHTML += `
+                    <div class="flex justify-start fade-in">
+                        <div class="bg-white p-3 rounded-lg rounded-tl-none shadow-sm border border-gray-200 text-sm text-slate-700 max-w-[90%] leading-relaxed">
+                            ${data.response}
+                        </div>
+                    </div>`;
+            } catch (err) {
+                chatBox.innerHTML += `<div class="text-xs text-center text-red-500 mt-2">Failed to reach agent.</div>`;
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // --- Draft Logic ---
+        async function generateDraft() {
+            if (!currentEmailId) return;
+            const btn = document.getElementById('btn-gen-draft');
+            const icon = btn.querySelector('i');
+            
+            // Loading UI
+            icon.classList.remove('lucide-sparkles');
+            icon.classList.add('lucide-loader-2', 'animate-spin');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            try {
+                const res = await fetch(`${API_URL}/agent/draft`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email_id: currentEmailId, language: selectedLanguage })
+                });
+                const data = await res.json();
+                
+                if (data.draft) {
+                    document.getElementById('draft-subject').value = data.draft.draft_subject;
+                    document.getElementById('draft-body').value = data.draft.draft_body;
+                    showToast('Draft generated successfully');
+                }
+            } catch (err) {
+                showToast('Failed to generate draft', 'error');
+            } finally {
+                // Reset UI
+                icon.classList.add('lucide-sparkles');
+                icon.classList.remove('lucide-loader-2', 'animate-spin');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+                lucide.createIcons();
+            }
+        }
+
+        async function toggleTaskCompletion(emailId, taskText){
+            try {
+                // Fetch latest analysis via emails endpoint to get tasks
+                const res = await fetch(`${API_URL}/emails`);
+                const emails = await res.json();
+                const email = emails.find(e => e.id === emailId);
+                if(!email) return;
+                const analysis = email.email_analysis && email.email_analysis[0] ? email.email_analysis[0] : null;
+                if(!analysis) return;
+                const tasks = (analysis.extracted_tasks || []).map(t => {
+                    if(t.task === taskText){ return { ...t, completed: !t.completed }; }
+                    return t;
+                });
+                await fetch(`${API_URL}/emails/${emailId}/tasks`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tasks })
+                });
+                showToast('Task updated');
+            } catch(e){ showToast('Task update failed','error'); }
+        }
+
+        function setLanguage(lang){ selectedLanguage = lang; showToast(`Language set to ${lang}`); }
+
+        // --- Brain (Prompts) Logic ---
+        async function loadPrompts() {
+            const container = document.getElementById('prompts-container');
+            try {
+                const res = await fetch(`${API_URL}/prompts`);
+                const prompts = await res.json();
+                container.innerHTML = '';
+
+                prompts.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden';
+                    card.innerHTML = `
+                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <div class="p-1.5 bg-blue-100 text-blue-600 rounded">
+                                    <i data-lucide="terminal-square" class="w-4 h-4"></i>
+                                </div>
+                                <span class="font-semibold text-sm text-slate-700 capitalize">${p.prompt_type.replace('_', ' ')} Prompt</span>
+                            </div>
+                            <button onclick="savePrompt('${p.id}')" id="btn-save-${p.id}" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-md transition-colors shadow-sm flex items-center gap-1">
+                                <i data-lucide="save" class="w-3 h-3"></i> Save Configuration
+                            </button>
+                        </div>
+                        <div class="p-0">
+                            <textarea id="prompt-input-${p.id}" class="w-full h-48 p-4 font-mono text-xs md:text-sm text-slate-600 bg-white focus:bg-slate-50 focus:outline-none resize-y" spellcheck="false">${p.content}</textarea>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+                lucide.createIcons();
+            } catch (err) {
+                container.innerHTML = `<p class="text-red-500 text-center">Error loading prompts.</p>`;
+            }
+        }
+
+        async function savePrompt(id) {
+            const content = document.getElementById(`prompt-input-${id}`).value;
+            const btn = document.getElementById(`btn-save-${id}`);
+            
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Saving...`;
+            lucide.createIcons();
+
+            try {
+                await fetch(`${API_URL}/prompts/${id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+                showToast('Prompt updated. Agent behavior modified.');
+            } catch (err) {
+                showToast('Error saving prompt', 'error');
+            } finally {
+                btn.innerHTML = `<i data-lucide="save" class="w-3 h-3"></i> Save Configuration`;
+                lucide.createIcons();
+            }
+        }
+
+        // --- Utilities ---
+        function showToast(msg, type='success') {
+            const toast = document.getElementById('toast');
+            const messageEl = document.getElementById('toast-message');
+            const icon = toast.querySelector('i');
+            
+            messageEl.innerText = msg;
+            
+            if(type === 'error') {
+                icon.setAttribute('data-lucide', 'alert-circle');
+                icon.classList.remove('text-green-400');
+                icon.classList.add('text-red-400');
+            } else {
+                icon.setAttribute('data-lucide', 'check-circle');
+                icon.classList.add('text-green-400');
+                icon.classList.remove('text-red-400');
+            }
+            lucide.createIcons();
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Initial Load
+        loadEmails();
+    </script>
 </body>
 </html>

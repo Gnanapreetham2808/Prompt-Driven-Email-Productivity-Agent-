@@ -1,12 +1,13 @@
 import os
 import json
-from typing import List, Optional
+from typing import List, Optional, Any
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from supabase import create_client, Client
 from openai import OpenAI
 from dotenv import load_dotenv
+from collections import Counter
 
 # Load environment variables
 load_dotenv()
@@ -55,9 +56,20 @@ class PromptContentUpdate(BaseModel):
 class AgentChatRequest(BaseModel):
     email_id: str
     user_query: str
+    language: Optional[str] = None  # Optional target language for response
 
 class DraftRequest(BaseModel):
     email_id: str
+    language: Optional[str] = None  # Optional target language for draft
+
+class TasksUpdate(BaseModel):
+    tasks: List[dict]  # Each dict: {"task": str, "deadline": Optional[str], "completed": bool}
+
+class CategoryUpdate(BaseModel):
+    category: str
+
+class StarToggle(BaseModel):
+    starred: bool
 
 # Default Prompts Data
 DEFAULT_PROMPTS = [
@@ -106,7 +118,119 @@ async def init_prompts():
 
 @app.get("/")
 async def root():
-    return {"message": "API is running"}
+    return {"message": "Email Productivity Agent API is running", "docs": "/docs"}
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for deployment monitoring"""
+    return {
+        "status": "healthy",
+        "supabase": "connected" if supabase else "disconnected",
+        "openai": "connected" if openai_client else "disconnected"
+    }
+
+@app.get("/analytics/dashboard")
+async def get_dashboard_analytics():
+    """
+    Get comprehensive email analytics for dashboard display
+    """
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Supabase client not initialized")
+    
+    try:
+        # Fetch all data
+        emails_res = supabase.table("emails").select("*").execute()
+        analysis_res = supabase.table("email_analysis").select("*").execute()
+        drafts_res = supabase.table("drafts").select("*").execute()
+        
+        emails = emails_res.data
+        analyses = analysis_res.data
+        drafts = drafts_res.data
+        
+        # Calculate statistics
+        total_emails = len(emails)
+        total_analyzed = len(analyses)
+        total_drafts = len(drafts)
+        
+        # Category breakdown
+        categories = [a.get('category', 'Uncategorized') for a in analyses]
+        category_counts = dict(Counter(categories))
+        
+        # Action items count
+        total_tasks = sum(len(a.get('extracted_tasks', [])) for a in analyses if a.get('extracted_tasks'))
+        
+        # Sender statistics
+        sender_counts = dict(Counter([e.get('sender') for e in emails]))
+        top_senders = sorted(sender_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+        
+        # Unread count
+        unread_count = sum(1 for e in emails if not e.get('is_read', False))
+        
+        return {
+            "total_emails": total_emails,
+            "analyzed_emails": total_analyzed,
+            "unread_emails": unread_count,
+            "total_drafts": total_drafts,
+            "total_action_items": total_tasks,
+            "category_breakdown": category_counts,
+            "top_senders": [{"email": sender, "count": count} for sender, count in top_senders],
+            "analysis_rate": round((total_analyzed / total_emails * 100) if total_emails > 0 else 0, 1)
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/emails/search")
+async def search_emails(q: str = ""):
+    """
+    Search emails by sender, subject, or body content
+    """
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Supabase client not initialized")
+    
+    try:
+        if not q:
+            return []
+        
+        # Search across multiple fields
+        response = supabase.table("emails").select("*, email_analysis(category, extracted_tasks)").or_(
+            f"sender.ilike.%{q}%,subject.ilike.%{q}%,body.ilike.%{q}%"
+        ).order("received_at", desc=True).execute()
+        
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/emails/unread-count")
+async def unread_count():
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Supabase client not initialized")
+    try:
+        res = supabase.table("emails").select("id,is_read").execute()
+        count = sum(1 for e in res.data if not e.get("is_read", False))
+        return {"unread": count}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/emails/filter")
+async def filter_emails(category: Optional[str] = None, unread: Optional[bool] = None, starred: Optional[bool] = None):
+    """Filter emails locally by joined analysis category, unread status, starred flag."""
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Supabase client not initialized")
+    try:
+        res = supabase.table("emails").select("*, email_analysis(category, previous_category, extracted_tasks)").order("received_at", desc=True).execute()
+        data = res.data or []
+        filtered = []
+        for e in data:
+            analysis = e.get("email_analysis") or {}
+            cat_ok = True if category is None else (analysis.get("category") == category)
+            unread_ok = True if unread is None else ((not e.get("is_read", False)) == unread)
+            starred_ok = True if starred is None else (e.get("is_starred", False) == starred)
+            if cat_ok and unread_ok and starred_ok:
+                filtered.append(e)
+        return filtered
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/ingest")
 async def ingest_emails():
@@ -134,7 +258,9 @@ async def ingest_emails():
                 "subject": email["subject"],
                 "body": email["body"],
                 "received_at": email["timestamp"],
-                "is_read": False
+                "is_read": False,
+                "is_starred": False,
+                "attachments": email.get("attachments", [])
             }
             
             # Insert and get the new record to get the UUID
@@ -180,11 +306,28 @@ async def ingest_emails():
                 analysis_json = json.loads(analysis_content)
                 
                 # 4. Insert into email_analysis
+                # Normalize tasks adding completion flag
+                raw_tasks = analysis_json.get("extracted_tasks") or []
+                tasks_with_status = []
+                for t in raw_tasks:
+                    if isinstance(t, dict):
+                        tasks_with_status.append({
+                            "task": t.get("task"),
+                            "deadline": t.get("deadline"),
+                            "completed": False
+                        })
+                    else:
+                        # If the model returned a plain string list fallback
+                        tasks_with_status.append({
+                            "task": str(t),
+                            "deadline": None,
+                            "completed": False
+                        })
+
                 analysis_data = {
                     "email_id": new_email_id,
                     "category": analysis_json.get("category"),
-                    "extracted_tasks": analysis_json.get("extracted_tasks"),
-                    # analysis_date defaults to NOW() in DB, but we can send it if needed
+                    "extracted_tasks": tasks_with_status,
                 }
                 
                 supabase.table("email_analysis").insert(analysis_data).execute()
@@ -239,10 +382,99 @@ async def get_emails():
         # Fetch emails and join with analysis if possible, or just fetch emails for now
         # Supabase-py join syntax can be tricky, let's just fetch emails and analysis separately or use a view if we had one.
         # For simplicity, let's just fetch emails.
-        response = supabase.table("emails").select("*, email_analysis(category, extracted_tasks)").order("received_at", desc=True).execute()
+        response = supabase.table("emails").select("*, email_analysis(category, previous_category, extracted_tasks)").order("received_at", desc=True).execute()
         return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/emails/{email_id}/star")
+async def star_email(email_id: str):
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Supabase client not initialized")
+    try:
+        res = supabase.table("emails").update({"is_starred": True}).eq("id", email_id).execute()
+        return {"message": "Email starred", "data": res.data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/emails/{email_id}/unstar")
+async def unstar_email(email_id: str):
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Supabase client not initialized")
+    try:
+        res = supabase.table("emails").update({"is_starred": False}).eq("id", email_id).execute()
+        return {"message": "Email unstarred", "data": res.data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.patch("/emails/{email_id}/tasks")
+async def update_tasks(email_id: str, update: TasksUpdate):
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Supabase client not initialized")
+    try:
+        # Ensure tasks structure validity minimally
+        normalized = []
+        for t in update.tasks:
+            if not isinstance(t, dict):
+                continue
+            normalized.append({
+                "task": t.get("task"),
+                "deadline": t.get("deadline"),
+                "completed": bool(t.get("completed", False))
+            })
+        res = supabase.table("email_analysis").update({"extracted_tasks": normalized}).eq("email_id", email_id).execute()
+        return {"message": "Tasks updated", "data": res.data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.patch("/emails/{email_id}/category")
+async def update_category(email_id: str, update: CategoryUpdate):
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Supabase client not initialized")
+    try:
+        # Fetch existing analysis row
+        existing = supabase.table("email_analysis").select("id, category").eq("email_id", email_id).execute()
+        if not existing.data:
+            raise HTTPException(status_code=404, detail="Analysis not found for email")
+        row = existing.data[0]
+        res = supabase.table("email_analysis").update({
+            "previous_category": row.get("category"),
+            "category": update.category
+        }).eq("id", row.get("id")).execute()
+        return {"message": "Category updated", "data": res.data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/emails/{email_id}/undo-category")
+async def undo_category(email_id: str):
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Supabase client not initialized")
+    try:
+        existing = supabase.table("email_analysis").select("id, category, previous_category").eq("email_id", email_id).execute()
+        if not existing.data:
+            raise HTTPException(status_code=404, detail="Analysis not found for email")
+        row = existing.data[0]
+        prev = row.get("previous_category")
+        if not prev:
+            raise HTTPException(status_code=400, detail="No previous category to revert to")
+        res = supabase.table("email_analysis").update({
+            "category": prev,
+            "previous_category": None
+        }).eq("id", row.get("id")).execute()
+        return {"message": "Category reverted", "data": res.data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/prompt-templates")
+async def prompt_templates():
+    # Static library of prompt templates for user selection
+    templates = [
+        {"prompt_type": "categorization", "name": "Concise Categorization", "content": "Classify the email into: Meeting | Newsletter | Spam | Task | Project Update. Respond with one word."},
+        {"prompt_type": "action_item", "name": "Detailed Task Extraction", "content": "Extract actionable tasks with any deadlines; return JSON [{task, deadline}]."},
+        {"prompt_type": "auto_reply", "name": "Friendly Follow-Up", "content": "Write a warm, concise follow-up acknowledging receipt and next steps."},
+        {"prompt_type": "general_agent", "name": "Analyst", "content": "Answer questions about the email focusing on facts and tasks."}
+    ]
+    return templates
 
 @app.post("/agent/chat")
 async def agent_chat(request: AgentChatRequest):
@@ -282,11 +514,16 @@ async def agent_chat(request: AgentChatRequest):
         """
 
         # 3. Call OpenAI
+        if request.language and request.language.lower() not in ["en", "english"]:
+            user_query = f"Please respond in {request.language}.\n\nUser Query: {request.user_query}"
+        else:
+            user_query = request.user_query
+
         completion = openai_client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_message},
-                {"role": "user", "content": request.user_query}
+                {"role": "user", "content": user_query}
             ]
         )
         
@@ -318,8 +555,10 @@ async def generate_draft(request: DraftRequest):
             system_instruction = "Draft a professional reply to this email."
 
         # 3. Call OpenAI
+        language_instruction = "" if not request.language or request.language.lower() in ["en", "english"] else f"Write the subject and body in {request.language}."
         system_prompt = f"""
         {system_instruction}
+        {language_instruction}
         
         Output Format: Return a valid JSON object with exactly these keys:
         - "draft_subject": string

@@ -18,7 +18,9 @@ CREATE TABLE IF NOT EXISTS emails (
     subject TEXT,
     body TEXT,
     received_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    is_read BOOLEAN DEFAULT FALSE
+    is_read BOOLEAN DEFAULT FALSE,
+    is_starred BOOLEAN DEFAULT FALSE,
+    attachments JSONB DEFAULT '[]'
 );
 
 -- Table: email_analysis
@@ -27,6 +29,7 @@ CREATE TABLE IF NOT EXISTS email_analysis (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email_id UUID NOT NULL REFERENCES emails(id) ON DELETE CASCADE,
     category TEXT,
+    previous_category TEXT,
     extracted_tasks JSONB, -- Stores tasks as a JSON array/object
     analysis_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
