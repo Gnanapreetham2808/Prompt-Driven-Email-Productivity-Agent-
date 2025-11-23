@@ -8,6 +8,9 @@ from supabase import create_client, Client
 from openai import OpenAI
 from dotenv import load_dotenv
 from collections import Counter
+from gmail_sync import GmailSync
+from fastapi.responses import RedirectResponse
+from datetime import datetime
 
 # Load environment variables
 load_dotenv()
@@ -30,6 +33,18 @@ if not OPENAI_API_KEY:
     openai_client = None
 else:
     openai_client = OpenAI(api_key=OPENAI_API_KEY)
+
+# Initialize Gmail Sync
+gmail_sync = GmailSync()
+
+# Note: For production, create user_tokens table in Supabase:
+# CREATE TABLE IF NOT EXISTS user_tokens (
+#     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+#     user_email TEXT UNIQUE NOT NULL,
+#     token_data JSONB NOT NULL,
+#     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+#     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+# );
 
 app = FastAPI(title="Prompt-Driven Email Productivity Agent")
 
@@ -588,5 +603,194 @@ async def generate_draft(request: DraftRequest):
         
         return {"message": "Draft generated successfully", "draft": insert_res.data[0]}
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =============================================================================
+# Gmail OAuth & Sync Endpoints
+# =============================================================================
+
+# Note: You need to create the user_tokens table in Supabase:
+# CREATE TABLE IF NOT EXISTS user_tokens (
+#     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+#     user_email TEXT UNIQUE NOT NULL,
+#     token_data JSONB NOT NULL,
+#     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+#     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+# );
+
+@app.get("/auth/gmail")
+async def auth_gmail():
+    """
+    Initiates Gmail OAuth flow. Returns authorization URL for user to visit.
+    """
+    try:
+        authorization_url, state = gmail_sync.get_authorization_url()
+        return {
+            "authorization_url": authorization_url,
+            "state": state,
+            "message": "Visit the authorization_url to grant Gmail access"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/auth/gmail/callback")
+async def auth_gmail_callback(code: str, state: str):
+    """
+    Handles OAuth callback from Google. Exchanges code for tokens and stores them.
+    """
+    try:
+        # Exchange authorization code for tokens
+        token_data = gmail_sync.exchange_code_for_token(code)
+        
+        # Get user's email address
+        service = gmail_sync.build_service(token_data)
+        user_email = gmail_sync.get_user_email(service)
+        
+        # Store tokens in database (upsert)
+        token_record = {
+            "user_email": user_email,
+            "token_data": token_data,
+            "updated_at": datetime.utcnow().isoformat()
+        }
+        
+        # Try to update existing record, if not exists then insert
+        existing = supabase.table("user_tokens").select("*").eq("user_email", user_email).execute()
+        
+        if existing.data:
+            supabase.table("user_tokens").update(token_record).eq("user_email", user_email).execute()
+        else:
+            supabase.table("user_tokens").insert(token_record).execute()
+        
+        return RedirectResponse(url=f"http://localhost:5500/frontend/index.html?gmail_connected=true")
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class SyncGmailRequest(BaseModel):
+    user_email: str
+    max_results: Optional[int] = 50
+
+
+@app.post("/sync/gmail")
+async def sync_gmail(request: SyncGmailRequest):
+    """
+    Fetches emails from Gmail using stored OAuth tokens and runs AI analysis.
+    """
+    try:
+        # 1. Retrieve stored tokens for this user
+        token_result = supabase.table("user_tokens").select("token_data").eq("user_email", request.user_email).execute()
+        
+        if not token_result.data:
+            raise HTTPException(status_code=404, detail="No Gmail tokens found for this user. Please authenticate first.")
+        
+        token_data = token_result.data[0]["token_data"]
+        
+        # 2. Fetch emails from Gmail
+        emails = gmail_sync.fetch_emails(token_data, max_results=request.max_results)
+        
+        if not emails:
+            return {"message": "No new emails to sync", "synced_count": 0}
+        
+        # 3. Insert emails into database and run AI analysis
+        synced_count = 0
+        analyzed_count = 0
+        
+        for email_data in emails:
+            # Check if email already exists (by message_id)
+            existing = supabase.table("emails").select("id").eq("message_id", email_data.get("message_id")).execute()
+            
+            if existing.data:
+                continue  # Skip if already synced
+            
+            # Insert email
+            email_record = {
+                "from_address": email_data.get("from"),
+                "to_address": email_data.get("to"),
+                "subject": email_data.get("subject"),
+                "body": email_data.get("body"),
+                "received_at": email_data.get("date"),
+                "message_id": email_data.get("message_id"),
+                "has_attachments": len(email_data.get("attachments", [])) > 0,
+                "attachment_names": [att.get("filename") for att in email_data.get("attachments", [])]
+            }
+            
+            insert_result = supabase.table("emails").insert(email_record).execute()
+            email_id = insert_result.data[0]["id"]
+            synced_count += 1
+            
+            # 4. Run AI analysis on the email
+            try:
+                # Get all prompts
+                prompts_result = supabase.table("prompts").select("*").eq("is_active", True).execute()
+                prompts = prompts_result.data
+                
+                if not prompts:
+                    continue
+                
+                # Prepare email content for analysis
+                email_content = f"""
+                From: {email_data.get('from')}
+                Subject: {email_data.get('subject')}
+                Body: {email_data.get('body')}
+                """
+                
+                # Categorization analysis
+                categorization_prompt = next((p for p in prompts if p["type"] == "categorization"), None)
+                if categorization_prompt:
+                    cat_completion = client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[
+                            {"role": "system", "content": categorization_prompt["system_prompt"]},
+                            {"role": "user", "content": email_content}
+                        ]
+                    )
+                    category = cat_completion.choices[0].message.content
+                else:
+                    category = "Uncategorized"
+                
+                # Task extraction analysis
+                task_prompt = next((p for p in prompts if p["type"] == "task_extraction"), None)
+                tasks = []
+                if task_prompt:
+                    task_completion = client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[
+                            {"role": "system", "content": task_prompt["system_prompt"]},
+                            {"role": "user", "content": email_content}
+                        ]
+                    )
+                    task_content = task_completion.choices[0].message.content
+                    try:
+                        task_data = json.loads(task_content)
+                        tasks = task_data.get("tasks", [])
+                    except:
+                        tasks = []
+                
+                # Store analysis
+                analysis_record = {
+                    "email_id": email_id,
+                    "category": category,
+                    "extracted_tasks": tasks,
+                    "has_tasks": len(tasks) > 0,
+                    "all_tasks_completed": False
+                }
+                
+                supabase.table("email_analysis").insert(analysis_record).execute()
+                analyzed_count += 1
+                
+            except Exception as analysis_error:
+                print(f"Analysis failed for email {email_id}: {str(analysis_error)}")
+                continue
+        
+        return {
+            "message": "Gmail sync completed",
+            "synced_count": synced_count,
+            "analyzed_count": analyzed_count
+        }
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

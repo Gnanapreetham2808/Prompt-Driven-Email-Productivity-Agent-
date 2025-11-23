@@ -42,6 +42,13 @@
                 <i data-lucide="bot" class="w-6 h-6"></i>
             </div>
             <h1 class="font-semibold text-xl tracking-tight text-slate-800 flex items-center gap-3">Email Agent <span id="unread-badge" class="hidden text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">0 Unread</span></h1>
+            <div id="gmail-status" class="hidden flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-xs font-medium text-green-700">Gmail Connected</span>
+            </div>
+            <button onclick="connectGmail()" id="btn-connect-gmail" class="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg transition-colors shadow-sm text-sm font-medium">
+                <i data-lucide="mail" class="w-4 h-4"></i> Connect Gmail
+            </button>
         </div>
         
         <nav class="flex gap-2 items-center bg-gray-100 p-1 rounded-lg">
@@ -123,7 +130,12 @@
                                     <span id="detail-date"></span>
                                 </div>
                             </div>
-                            <span id="detail-category" class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600"></span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="undoCategory()" id="btn-undo-category" class="hidden text-xs px-2 py-1 rounded bg-orange-100 text-orange-700 hover:bg-orange-200 flex items-center gap-1" title="Undo last categorization">
+                                    <i data-lucide="undo" class="w-3 h-3"></i> Undo
+                                </button>
+                                <span id="detail-category" class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600"></span>
+                            </div>
                         </div>
                         
                         <!-- Action Items extracted -->
@@ -132,6 +144,14 @@
                                 <i data-lucide="check-square" class="w-3 h-3"></i> Action Items
                             </h4>
                             <div id="tasks-list" class="flex flex-wrap gap-2"></div>
+                        </div>
+
+                        <!-- Attachments -->
+                        <div id="detail-attachments" class="hidden mt-2">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                <i data-lucide="paperclip" class="w-3 h-3"></i> Attachments
+                            </h4>
+                            <div id="attachments-list" class="flex flex-wrap gap-2"></div>
                         </div>
                     </div>
 
@@ -212,6 +232,25 @@
                     <h2 class="text-2xl font-bold text-slate-900">Agent Brain Configuration</h2>
                     <p class="text-slate-500 mt-1">Modify the system prompts below to change how the AI analyzes emails and drafts replies.</p>
                 </div>
+
+                <!-- Prompt Template Picker -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            <i data-lucide="library" class="w-4 h-4 text-blue-600"></i>
+                            Prompt Templates Library
+                        </h3>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="template-selector" class="flex-1 text-sm px-3 py-2 border border-gray-300 rounded-lg bg-white">
+                            <option value="">-- Select a template to preview --</option>
+                        </select>
+                        <button onclick="applyTemplate()" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i> Apply Template
+                        </button>
+                    </div>
+                    <div id="template-preview" class="hidden mt-3 p-3 bg-gray-50 rounded border border-gray-200 text-xs text-slate-600 font-mono"></div>
+                </div>
                 
                 <div id="prompts-container" class="space-y-6">
                     <div class="flex justify-center py-12">
@@ -234,6 +273,8 @@
         let currentEmailId = null;
         let activeAgentTab = 'chat';
         let selectedLanguage = 'en';
+        let gmailConnected = false;
+        let userEmail = localStorage.getItem('gmail_user_email') || '';
 
         // --- Icons ---
         lucide.createIcons();
@@ -421,15 +462,106 @@
             btn.disabled = true;
 
             try {
-                const res = await fetch(`${API_URL}/ingest`, { method: 'POST' });
-                const data = await res.json();
-                showToast(data.message || 'Ingestion complete');
+                if (gmailConnected && userEmail) {
+                    // Use Gmail sync
+                    const res = await fetch(`${API_URL}/sync/gmail`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_email: userEmail, max_results: 50 })
+                    });
+                    const data = await res.json();
+                    showToast(`Gmail sync complete: ${data.synced_count} emails synced, ${data.analyzed_count} analyzed`);
+                } else {
+                    // Fallback to mock ingestion
+                    const res = await fetch(`${API_URL}/ingest`, { method: 'POST' });
+                    const data = await res.json();
+                    showToast(data.message || 'Ingestion complete');
+                }
                 loadEmails();
             } catch (err) {
-                showToast('Ingestion failed', 'error');
+                showToast('Sync failed: ' + (err.message || 'Unknown error'), 'error');
             } finally {
                 icon.classList.remove('animate-spin');
                 btn.disabled = false;
+            }
+        }
+
+        async function connectGmail() {
+            try {
+                const res = await fetch(`${API_URL}/auth/gmail`);
+                const data = await res.json();
+                
+                if (data.authorization_url) {
+                    // Open OAuth flow in popup window
+                    const width = 600;
+                    const height = 700;
+                    const left = (screen.width - width) / 2;
+                    const top = (screen.height - height) / 2;
+                    
+                    window.open(
+                        data.authorization_url,
+                        'Gmail OAuth',
+                        `width=${width},height=${height},left=${left},top=${top}`
+                    );
+                    
+                    showToast('Complete the authorization in the popup window');
+                } else {
+                    showToast('Failed to initiate Gmail OAuth', 'error');
+                }
+            } catch (err) {
+                showToast('Error connecting to Gmail: ' + err.message, 'error');
+            }
+        }
+
+        function checkGmailConnection() {
+            // Check if URL has gmail_connected parameter (from OAuth callback)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('gmail_connected') === 'true') {
+                gmailConnected = true;
+                
+                // Prompt for user email if not stored
+                if (!userEmail) {
+                    userEmail = prompt('Enter your Gmail address to complete setup:');
+                    if (userEmail) {
+                        localStorage.setItem('gmail_user_email', userEmail);
+                    }
+                }
+                
+                updateGmailStatus();
+                showToast('Gmail connected successfully!');
+                
+                // Clear the URL parameter
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Auto-sync emails
+                ingestEmails();
+            } else if (userEmail) {
+                // Check if user has stored email (assume connected)
+                gmailConnected = true;
+                updateGmailStatus();
+            }
+        }
+
+        function updateGmailStatus() {
+            const statusEl = document.getElementById('gmail-status');
+            const connectBtn = document.getElementById('btn-connect-gmail');
+            const syncBtn = document.getElementById('btn-ingest');
+            
+            if (gmailConnected && userEmail) {
+                statusEl.classList.remove('hidden');
+                statusEl.classList.add('flex');
+                connectBtn.classList.add('hidden');
+                
+                // Update sync button text
+                syncBtn.innerHTML = `<i data-lucide="refresh-cw" class="w-3 h-3"></i> Sync Gmail`;
+                lucide.createIcons();
+            } else {
+                statusEl.classList.add('hidden');
+                statusEl.classList.remove('flex');
+                connectBtn.classList.remove('hidden');
+                
+                syncBtn.innerHTML = `<i data-lucide="refresh-cw" class="w-3 h-3"></i> Sync`;
+                lucide.createIcons();
             }
         }
 
@@ -452,6 +584,35 @@
             document.getElementById('detail-date').innerText = new Date(email.received_at).toLocaleString();
             document.getElementById('detail-body').innerText = email.body;
             document.getElementById('detail-category').innerText = analysis.category || 'Uncategorized';
+
+            // Show undo button if previous_category exists
+            const undoBtn = document.getElementById('btn-undo-category');
+            if (analysis.previous_category) {
+                undoBtn.classList.remove('hidden');
+                undoBtn.classList.add('flex');
+            } else {
+                undoBtn.classList.add('hidden');
+                undoBtn.classList.remove('flex');
+            }
+
+            // Attachments
+            const attachmentsContainer = document.getElementById('detail-attachments');
+            const attachmentsList = document.getElementById('attachments-list');
+            attachmentsList.innerHTML = '';
+            if (email.attachments && email.attachments.length > 0) {
+                attachmentsContainer.classList.remove('hidden');
+                email.attachments.forEach(att => {
+                    const attEl = document.createElement('a');
+                    attEl.className = 'bg-blue-50 border border-blue-200 text-blue-800 text-xs px-3 py-1.5 rounded flex items-center gap-2 hover:bg-blue-100 transition-colors';
+                    attEl.href = att.url || '#';
+                    attEl.target = '_blank';
+                    attEl.innerHTML = `<i data-lucide="file" class="w-3 h-3"></i> <span class="font-medium">${att.name || 'Attachment'}</span> ${att.size ? `<span class="text-blue-600">(${att.size})</span>` : ''}`;
+                    attachmentsList.appendChild(attEl);
+                });
+                lucide.createIcons();
+            } else {
+                attachmentsContainer.classList.add('hidden');
+            }
 
             // Tasks (add checkbox + persistence)
             const tasksContainer = document.getElementById('detail-tasks');
@@ -584,10 +745,52 @@
 
         function setLanguage(lang){ selectedLanguage = lang; showToast(`Language set to ${lang}`); }
 
+        async function undoCategory() {
+            if (!currentEmailId) return;
+            try {
+                await fetch(`${API_URL}/emails/${currentEmailId}/undo-category`, { method: 'POST' });
+                showToast('Category reverted');
+                loadEmails();
+                // Refresh current email view
+                const res = await fetch(`${API_URL}/emails`);
+                const emails = await res.json();
+                const email = emails.find(e => e.id === currentEmailId);
+                if (email) {
+                    const analysis = email.email_analysis && email.email_analysis[0] ? email.email_analysis[0] : {};
+                    document.getElementById('detail-category').innerText = analysis.category || 'Uncategorized';
+                    document.getElementById('btn-undo-category').classList.add('hidden');
+                }
+            } catch(e) { showToast('Undo failed', 'error'); }
+        }
+
         // --- Brain (Prompts) Logic ---
         async function loadPrompts() {
             const container = document.getElementById('prompts-container');
             try {
+                // Load templates
+                const templatesRes = await fetch(`${API_URL}/prompt-templates`);
+                const templates = await templatesRes.json();
+                const selector = document.getElementById('template-selector');
+                selector.innerHTML = '<option value="">-- Select a template to preview --</option>';
+                templates.forEach((t, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = idx;
+                    opt.textContent = `${t.name} (${t.prompt_type})`;
+                    opt.dataset.content = t.content;
+                    opt.dataset.type = t.prompt_type;
+                    selector.appendChild(opt);
+                });
+                selector.onchange = () => {
+                    const selected = selector.options[selector.selectedIndex];
+                    const preview = document.getElementById('template-preview');
+                    if (selected.value) {
+                        preview.classList.remove('hidden');
+                        preview.textContent = selected.dataset.content;
+                    } else {
+                        preview.classList.add('hidden');
+                    }
+                };
+
                 const res = await fetch(`${API_URL}/prompts`);
                 const prompts = await res.json();
                 container.innerHTML = '';
@@ -616,6 +819,30 @@
                 lucide.createIcons();
             } catch (err) {
                 container.innerHTML = `<p class="text-red-500 text-center">Error loading prompts.</p>`;
+            }
+        }
+
+        async function applyTemplate() {
+            const selector = document.getElementById('template-selector');
+            const selected = selector.options[selector.selectedIndex];
+            if (!selected.value) { showToast('Please select a template', 'error'); return; }
+            
+            const content = selected.dataset.content;
+            const type = selected.dataset.type;
+            
+            // Find matching prompt by type and update its textarea
+            const prompts = await fetch(`${API_URL}/prompts`).then(r => r.json());
+            const matchingPrompt = prompts.find(p => p.prompt_type === type);
+            if (matchingPrompt) {
+                const textarea = document.getElementById(`prompt-input-${matchingPrompt.id}`);
+                if (textarea) {
+                    textarea.value = content;
+                    showToast(`Template applied to ${type} prompt. Click Save to persist.`);
+                } else {
+                    showToast('Matching prompt field not found', 'error');
+                }
+            } else {
+                showToast(`No ${type} prompt found in your configuration`, 'error');
             }
         }
 
@@ -667,6 +894,7 @@
         }
 
         // Initial Load
+        checkGmailConnection();
         loadEmails();
     </script>
 </body>
