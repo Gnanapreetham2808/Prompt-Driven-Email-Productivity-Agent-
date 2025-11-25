@@ -3,13 +3,14 @@ import json
 from typing import List, Optional, Any
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from supabase import create_client, Client
 from openai import OpenAI
 from dotenv import load_dotenv
 from collections import Counter
 from gmail_sync import GmailSync
-from fastapi.responses import RedirectResponse, HTMLResponse
 from datetime import datetime
 
 # Load environment variables
@@ -56,6 +57,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files (frontend)
+frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
+if os.path.exists(frontend_path):
+    app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
 # Pydantic Models
 class PromptUpdate(BaseModel):
@@ -158,6 +164,10 @@ async def init_prompts():
 
 @app.get("/")
 async def root():
+    """Serve frontend HTML or API info"""
+    frontend_file = os.path.join(os.path.dirname(__file__), "..", "frontend", "index.html")
+    if os.path.exists(frontend_file):
+        return FileResponse(frontend_file)
     return {"message": "Email Productivity Agent API is running", "docs": "/docs"}
 
 @app.get("/health")

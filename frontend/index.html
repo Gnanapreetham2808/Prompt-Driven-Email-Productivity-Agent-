@@ -269,10 +269,10 @@
 
     <script>
         // --- State Management ---
-        // Auto-detect API URL: use environment variable in production, localhost in development
+        // Auto-detect API URL: use same origin in production, localhost in development
         const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
             ? 'http://127.0.0.1:8000' 
-            : `https://${window.RENDER_API_HOST || 'email-agent-api.onrender.com'}`;
+            : window.location.origin;
         let currentEmailId = null;
         let activeAgentTab = 'chat';
         let selectedLanguage = 'en';
