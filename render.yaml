@@ -1,12 +1,18 @@
 services:
+  # Backend API Service
   - type: web
     name: email-agent-api
     env: python
+    runtime: python-3.12
     region: oregon
     plan: free
-    buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    buildCommand: |
+      cd backend
+      pip install --upgrade pip
+      pip install -r requirements-render.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT --workers 2 --timeout-keep-alive 65 --log-level info
     healthCheckPath: /health
+    autoDeploy: true
     envVars:
       - key: SUPABASE_URL
         sync: false
@@ -14,3 +20,35 @@ services:
         sync: false
       - key: OPENAI_API_KEY
         sync: false
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: RENDER_EXTERNAL_URL
+        value: https://email-agent-api.onrender.com
+  
+  # Static Site for Frontend
+  - type: static
+    name: email-agent-frontend
+    buildCommand: |
+      echo "Injecting API URL into frontend..."
+      sed -i "s|window.RENDER_API_HOST \|\| 'email-agent-api.onrender.com'|'${RENDER_API_HOST}'|g" frontend/index.html || true
+    staticPublishPath: ./frontend
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=3600
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+    envVars:
+      - key: RENDER_API_HOST
+        fromService:
+          type: web
+          name: email-agent-api
+          property: host
