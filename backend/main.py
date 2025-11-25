@@ -60,8 +60,14 @@ app.add_middleware(
 
 # Mount static files (frontend)
 frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
-if os.path.exists(frontend_path):
-    app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+try:
+    if os.path.exists(frontend_path) and os.path.isdir(frontend_path):
+        app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+        print(f"Mounted static files from: {frontend_path}")
+    else:
+        print(f"Frontend path not found: {frontend_path}")
+except Exception as e:
+    print(f"Warning: Could not mount static files: {e}")
 
 # Pydantic Models
 class PromptUpdate(BaseModel):
