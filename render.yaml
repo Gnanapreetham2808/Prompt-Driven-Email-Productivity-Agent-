@@ -2,7 +2,6 @@ services:
   - type: web
     name: email-agent
     env: python
-    runtime: python-3.12
     region: oregon
     plan: free
     buildCommand: |
