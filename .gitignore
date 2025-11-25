@@ -4,6 +4,9 @@ __pycache__/
 .pytest_cache/
 *.pyc
 
-# Documentation files
-GMAIL_OAUTH_SETUP.md
-ROADMAP.md
+# Documentation files (keep deployment guides)
+# *.md files are now included for deployment documentation
+
+# Lambda deployment artifacts
+*.zip
+lambda-package/
