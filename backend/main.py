@@ -9,7 +9,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from collections import Counter
 from gmail_sync import GmailSync
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from datetime import datetime
 
 # Load environment variables
@@ -90,15 +90,40 @@ class StarToggle(BaseModel):
 DEFAULT_PROMPTS = [
     {
         "prompt_type": "categorization",
-        "content": "You are an intelligent email assistant. Categorize the following email into one of these categories: Meeting, Newsletter, Spam, Task, Project Update. Return only the category name."
+        "content": """Analyze this email and categorize it into ONE of these categories: 
+- "Urgent Task" (requires immediate action)
+- "Meeting" (meeting invitations, calendar items)
+- "Project Update" (status updates, sprint reviews)
+- "Newsletter" (marketing emails, digests, weekly roundups)
+- "Notification" (automated system notifications, alerts)
+- "Client Communication" (emails from clients/partners)
+- "Spam" (promotional, suspicious, irrelevant)
+- "General" (everything else)
+
+Choose the MOST SPECIFIC category that applies."""
     },
     {
         "prompt_type": "action_item",
-        "content": "Extract all action items, tasks, and deadlines from the following email. Return the result as a JSON list of objects with 'task' and 'deadline' fields."
+        "content": """Extract actionable tasks from this email. For each task, identify:
+- The specific action to be taken
+- Any deadline or due date mentioned (if any)
+
+Only return tasks that require the recipient to DO something.
+Ignore informational content or passive updates.
+
+Return empty list if no action items exist."""
     },
     {
         "prompt_type": "auto_reply",
-        "content": "Draft a professional and concise reply to the following email. Address the sender by name if possible and respond to the key points."
+        "content": """Draft a professional, concise reply to this email. 
+
+Guidelines:
+- Be polite and professional
+- Address the main points from the original email
+- Keep it brief (2-3 paragraphs maximum)
+- Use appropriate tone based on sender and context
+- End with a clear call-to-action or next steps if needed
+- Do not make up information - only respond based on the email content"""
     }
 ]
 
@@ -388,16 +413,35 @@ async def update_prompt(prompt_id: str, update: PromptContentUpdate):
 @app.get("/emails")
 async def get_emails():
     """
-    Fetches all emails with their analysis.
+    Fetches all emails with their analysis. If database is empty, returns mock data.
     """
     if not supabase:
         raise HTTPException(status_code=500, detail="Supabase client not initialized")
     
     try:
-        # Fetch emails and join with analysis if possible, or just fetch emails for now
-        # Supabase-py join syntax can be tricky, let's just fetch emails and analysis separately or use a view if we had one.
-        # For simplicity, let's just fetch emails.
+        # Fetch emails from database
         response = supabase.table("emails").select("*, email_analysis(category, previous_category, extracted_tasks)").order("received_at", desc=True).execute()
+        
+        # If database is empty, return mock emails
+        if not response.data or len(response.data) == 0:
+            try:
+                with open("mock_inbox.json", "r") as f:
+                    mock_emails = json.load(f)
+                # Transform mock format to match database format with pre-defined categories
+                return [{
+                    "id": str(email.get("id")),
+                    "sender": email.get("sender"),
+                    "subject": email.get("subject"),
+                    "body": email.get("body"),
+                    "received_at": email.get("timestamp"),
+                    "is_read": email.get("is_read", False),
+                    "is_starred": email.get("is_starred", False),
+                    "attachments": email.get("attachments", []),
+                    "email_analysis": [{"category": email.get("category", "General"), "extracted_tasks": []}] if email.get("category") else []
+                } for email in mock_emails]
+            except FileNotFoundError:
+                return []
+        
         return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -407,8 +451,24 @@ async def star_email(email_id: str):
     if not supabase:
         raise HTTPException(status_code=500, detail="Supabase client not initialized")
     try:
+        # Try database first
         res = supabase.table("emails").update({"is_starred": True}).eq("id", email_id).execute()
-        return {"message": "Email starred", "data": res.data}
+        if res.data:
+            return {"message": "Email starred", "data": res.data}
+        
+        # If not in database, update mock data
+        with open("mock_inbox.json", "r") as f:
+            mock_emails = json.load(f)
+        
+        for email in mock_emails:
+            if str(email.get("id")) == email_id:
+                email["is_starred"] = True
+                break
+        
+        with open("mock_inbox.json", "w") as f:
+            json.dump(mock_emails, f, indent=2)
+        
+        return {"message": "Email starred", "data": []}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -417,8 +477,24 @@ async def unstar_email(email_id: str):
     if not supabase:
         raise HTTPException(status_code=500, detail="Supabase client not initialized")
     try:
+        # Try database first
         res = supabase.table("emails").update({"is_starred": False}).eq("id", email_id).execute()
-        return {"message": "Email unstarred", "data": res.data}
+        if res.data:
+            return {"message": "Email unstarred", "data": res.data}
+        
+        # If not in database, update mock data
+        with open("mock_inbox.json", "r") as f:
+            mock_emails = json.load(f)
+        
+        for email in mock_emails:
+            if str(email.get("id")) == email_id:
+                email["is_starred"] = False
+                break
+        
+        with open("mock_inbox.json", "w") as f:
+            json.dump(mock_emails, f, indent=2)
+        
+        return {"message": "Email unstarred", "data": []}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -496,25 +572,50 @@ async def agent_chat(request: AgentChatRequest):
     """
     Chat with the agent about a specific email.
     """
-    if not supabase or not openai_client:
-        raise HTTPException(status_code=500, detail="Services not initialized")
+    if not openai_client:
+        raise HTTPException(status_code=500, detail="OpenAI client not initialized")
 
     try:
-        # 1. Fetch Email Body
-        email_res = supabase.table("emails").select("body, sender, subject").eq("id", request.email_id).execute()
-        if not email_res.data:
+        # 1. Fetch Email (try database first, then mock data)
+        email = None
+        
+        # Try database only if email_id looks like a UUID
+        if supabase and len(str(request.email_id)) > 10 and '-' in str(request.email_id):
+            try:
+                email_res = supabase.table("emails").select("body, sender, subject").eq("id", request.email_id).execute()
+                if email_res.data:
+                    email = email_res.data[0]
+            except Exception:
+                pass
+        
+        # If not in database, try mock_inbox.json
+        if not email:
+            try:
+                with open("mock_inbox.json", "r") as f:
+                    mock_emails = json.load(f)
+                mock_email = next((e for e in mock_emails if str(e.get("id")) == str(request.email_id)), None)
+                if mock_email:
+                    email = {
+                        "sender": mock_email.get("sender"),
+                        "subject": mock_email.get("subject"),
+                        "body": mock_email.get("body")
+                    }
+            except FileNotFoundError:
+                pass
+        
+        if not email:
             raise HTTPException(status_code=404, detail="Email not found")
         
-        email = email_res.data[0]
-        
         # 2. Fetch System Prompt (Try 'general_agent', fallback to generic)
-        # We can also allow the user to create a 'general_agent' prompt in the UI later.
-        prompt_res = supabase.table("prompts").select("content").eq("prompt_type", "general_agent").execute()
+        system_instruction = "You are a helpful AI assistant. You are analyzing the following email. Answer the user's questions based on the email content."
         
-        if prompt_res.data:
-            system_instruction = prompt_res.data[0]['content']
-        else:
-            system_instruction = "You are a helpful AI assistant. You are analyzing the following email. Answer the user's questions based on the email content."
+        if supabase:
+            try:
+                prompt_res = supabase.table("prompts").select("content").eq("prompt_type", "general_agent").execute()
+                if prompt_res.data:
+                    system_instruction = prompt_res.data[0]['content']
+            except Exception:
+                pass
 
         # Construct the full system message
         system_message = f"""
@@ -552,22 +653,48 @@ async def generate_draft(request: DraftRequest):
     """
     Generates a draft reply for an email and saves it to the database.
     """
-    if not supabase or not openai_client:
-        raise HTTPException(status_code=500, detail="Services not initialized")
+    if not openai_client:
+        raise HTTPException(status_code=500, detail="OpenAI client not initialized")
 
     try:
-        # 1. Fetch Email
-        email_res = supabase.table("emails").select("body, sender, subject").eq("id", request.email_id).execute()
-        if not email_res.data:
+        # 1. Fetch Email (try database first, then mock data)
+        email = None
+        email_from_db = False
+        
+        # Try database only if email_id looks like a UUID
+        if supabase and len(str(request.email_id)) > 10 and '-' in str(request.email_id):
+            try:
+                email_res = supabase.table("emails").select("body, sender, subject").eq("id", request.email_id).execute()
+                if email_res.data:
+                    email = email_res.data[0]
+                    email_from_db = True
+            except Exception:
+                pass  # Not a valid UUID, skip database
+        
+        # If not in database, try mock_inbox.json
+        if not email:
+            try:
+                with open("mock_inbox.json", "r") as f:
+                    mock_emails = json.load(f)
+                mock_email = next((e for e in mock_emails if str(e.get("id")) == str(request.email_id)), None)
+                if mock_email:
+                    email = {
+                        "sender": mock_email.get("sender"),
+                        "subject": mock_email.get("subject"),
+                        "body": mock_email.get("body")
+                    }
+            except FileNotFoundError:
+                pass
+        
+        if not email:
             raise HTTPException(status_code=404, detail="Email not found")
-        email = email_res.data[0]
 
         # 2. Fetch 'auto_reply' Prompt
-        prompt_res = supabase.table("prompts").select("content").eq("prompt_type", "auto_reply").execute()
-        if prompt_res.data:
-            system_instruction = prompt_res.data[0]['content']
-        else:
-            system_instruction = "Draft a professional reply to this email."
+        system_instruction = "Draft a professional reply to this email."
+        if supabase:
+            prompt_res = supabase.table("prompts").select("content").eq("prompt_type", "auto_reply").execute()
+            if prompt_res.data:
+                system_instruction = prompt_res.data[0]['content']
 
         # 3. Call OpenAI
         language_instruction = "" if not request.language or request.language.lower() in ["en", "english"] else f"Write the subject and body in {request.language}."
@@ -592,16 +719,19 @@ async def generate_draft(request: DraftRequest):
         draft_content = completion.choices[0].message.content
         draft_json = json.loads(draft_content)
 
-        # 4. Insert into drafts table
+        # 4. Insert into drafts table (only if email was from database)
         draft_data = {
-            "email_id": request.email_id,
             "draft_subject": draft_json.get("draft_subject"),
             "draft_body": draft_json.get("draft_body")
         }
         
-        insert_res = supabase.table("drafts").insert(draft_data).execute()
-        
-        return {"message": "Draft generated successfully", "draft": insert_res.data[0]}
+        if email_from_db and supabase:
+            draft_data["email_id"] = request.email_id
+            insert_res = supabase.table("drafts").insert(draft_data).execute()
+            return {"message": "Draft generated successfully", "draft": insert_res.data[0]}
+        else:
+            # Return draft without saving for mock emails
+            return {"message": "Draft generated successfully", "draft": draft_data}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -643,7 +773,7 @@ async def auth_gmail_callback(code: str, state: str):
     """
     try:
         # Exchange authorization code for tokens
-        token_data = gmail_sync.exchange_code_for_token(code)
+        token_data = gmail_sync.exchange_code_for_token(code, state)
         
         # Get user's email address
         service = gmail_sync.build_service(token_data)
@@ -664,7 +794,32 @@ async def auth_gmail_callback(code: str, state: str):
         else:
             supabase.table("user_tokens").insert(token_record).execute()
         
-        return RedirectResponse(url=f"http://localhost:5500/frontend/index.html?gmail_connected=true")
+        # Return HTML that closes popup and notifies parent window
+        html_content = f"""
+        <html>
+        <head><title>Gmail Connected</title></head>
+        <body>
+            <h2>✅ Gmail Connected Successfully!</h2>
+            <p>You can close this window.</p>
+            <script>
+                // Notify parent window
+                if (window.opener) {{
+                    window.opener.postMessage({{
+                        type: 'gmail_connected',
+                        user_email: '{user_email}'
+                    }}, '*');
+                    setTimeout(() => window.close(), 1000);
+                }} else {{
+                    // If not popup, redirect to main page
+                    setTimeout(() => {{
+                        window.location.href = '/';
+                    }}, 2000);
+                }}
+            </script>
+        </body>
+        </html>
+        """
+        return HTMLResponse(content=html_content)
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -794,3 +949,11 @@ async def sync_gmail(request: SyncGmailRequest):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# =============================================================================
+# AWS Lambda Handler
+# =============================================================================
+
+from mangum import Mangum
+handler = Mangum(app)

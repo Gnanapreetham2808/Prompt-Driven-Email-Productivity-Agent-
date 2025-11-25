@@ -1,107 +1,1002 @@
 [
   {
     "id": 1,
-    "sender": "alice.chen@example.com",
-    "subject": "Sync: Q3 Review Meeting",
-    "body": "Hi everyone, Let's gather to review Q3 performance. I've booked the main conference room for Tuesday at 10 AM. Please bring your reports.",
-    "timestamp": "2023-11-20T09:00:00Z"
+    "sender": "notifications@company.com",
+    "subject": "[Backup] Notification",
+    "body": "System: Backup\nStatus: Error\nTime: 17:00 PM\nDetails: System performing normally. No action required.\n\nAction required: None",
+    "timestamp": "2023-11-21T22:21:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 2,
-    "sender": "recruiting@example.com",
-    "subject": "Interview Confirmation: John Doe",
-    "body": "Confirming your interview with John Doe for the Senior Dev role tomorrow at 2 PM via Zoom. Please review his resume attached.",
-    "timestamp": "2023-11-21T14:30:00Z"
+    "sender": "newsletter@github.com",
+    "subject": "Product Updates - Weekly Digest",
+    "body": "Your weekly roundup of Budget Discussion news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Q4 Planning\n2. Team Sync\n3. Feature Launch\n\nTrending: Q4 Planning",
+    "timestamp": "2023-11-21T12:37:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 3,
-    "sender": "client.relations@partner.com",
-    "subject": "Coffee Chat?",
-    "body": "Hey, are you free for a quick coffee chat next Wednesday to discuss the new partnership opportunities? Let me know what time works.",
-    "timestamp": "2023-11-19T11:15:00Z"
+    "sender": "project.manager@company.com",
+    "subject": "Project Update: Analytics Dashboard",
+    "body": "Status update on Analytics Dashboard:\n\nProgress: 94%\nMilestones: In Progress\nRisks: Minor delays\nNext Steps: Testing phase\n\nPlease review and provide feedback.",
+    "timestamp": "2023-11-21T11:36:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 4,
-    "sender": "digest@techcrunch.com",
-    "subject": "Daily Crunch: The biggest AI news",
-    "body": "Today's top stories: OpenAI releases new model, Google updates Bard, and more startup news you need to know.",
-    "timestamp": "2023-11-22T08:00:00Z"
+    "sender": "calendar@company.com",
+    "subject": "Meeting Invitation: Q4 Planning",
+    "body": "You've been invited to a meeting about Q4 Planning.\n\nDate: Nov 25\nTime: 16:00 AM\nLocation: Conference Room A\n\nAgenda:\n- Client Review\n- Product Roadmap\n- Q&A\n\nPlease confirm your attendance.",
+    "timestamp": "2023-11-21T10:14:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 5,
-    "sender": "newsletter@morningbrew.com",
-    "subject": "Morning Brew: Markets are up",
-    "body": "Good morning! Here is what is happening in the stock market today. S&P 500 hits record high as tech stocks rally.",
-    "timestamp": "2023-11-21T07:00:00Z"
+    "sender": "team.lead@company.com",
+    "subject": "Sync Meeting: Training Session",
+    "body": "Hi team,\n\nLet's sync up on Training Session. I've scheduled a meeting for Nov 21 at 11:00 PM in Zoom.\n\nTopics to cover:\n- Training Session\n- Feature Launch\n- Q&A\n\nSee you there!",
+    "timestamp": "2023-11-21T00:48:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 6,
-    "sender": "weekly@css-tricks.com",
-    "subject": "CSS-Tricks Weekly",
-    "body": "This week: A guide to CSS Grid, Flexbox tricks, and new web standards you should know. Check out the tutorials.",
-    "timestamp": "2023-11-18T10:00:00Z"
+    "sender": "project.manager@company.com",
+    "subject": "Project Update: Payment System",
+    "body": "Status update on Payment System:\n\nProgress: 66%\nMilestones: On Track\nRisks: None\nNext Steps: Continue development\n\nPlease review and provide feedback.",
+    "timestamp": "2023-11-20T23:48:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 7,
-    "sender": "promo@super-deals.xyz",
-    "subject": "FINAL NOTICE: 90% OFF",
-    "body": "Don't miss out on our closing down sale. Everything must go! Click here to claim your discount immediately.",
-    "timestamp": "2023-11-20T04:20:00Z"
+    "sender": "globalsolutions@client.com",
+    "subject": "Re: Client Review",
+    "body": "Hi,\n\nThanks for your message about Client Review. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nLisa Anderson",
+    "timestamp": "2023-11-20T22:29:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 8,
-    "sender": "prince.nigeria@wealth.com",
-    "subject": "Business Proposal",
-    "body": "I have a business proposal that will benefit us both. Please reply for details regarding a large sum of funds.",
-    "timestamp": "2023-11-15T12:00:00Z"
+    "sender": "cloudfirst@client.com",
+    "subject": "Re: Performance Review",
+    "body": "Hi,\n\nThanks for your message about Performance Review. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nLisa Anderson",
+    "timestamp": "2023-11-20T22:27:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 9,
-    "sender": "boss@company.com",
-    "subject": "Urgent: Q4 Budget Report",
-    "body": "I need the Q4 budget report on my desk by end of day Friday. Please prioritize this over other tasks.",
-    "timestamp": "2023-11-22T09:30:00Z"
+    "sender": "engineering@company.com",
+    "subject": "Analytics Dashboard - Sprint Review",
+    "body": "Sprint 21 has been completed!\n\nCompleted Items:\n- Security Update\n- Team Sync\n\nCarried Over:\n- Q4 Planning\n\nNext sprint starts Nov 21.",
+    "timestamp": "2023-11-20T04:00:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 10,
-    "sender": "compliance@company.com",
-    "subject": "Mandatory Security Training",
-    "body": "Please complete the annual security awareness training by Nov 30th. Failure to complete may result in account suspension.",
-    "timestamp": "2023-11-20T13:00:00Z"
+    "sender": "team.lead@company.com",
+    "subject": "Sync Meeting: Team Sync",
+    "body": "Hi team,\n\nLet's sync up on Team Sync. I've scheduled a meeting for Nov 22 at 16:00 AM in Board Room.\n\nTopics to cover:\n- Product Roadmap\n- Feature Launch\n- Q&A\n\nSee you there!",
+    "timestamp": "2023-11-19T12:35:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 11,
-    "sender": "editor@blog.com",
-    "subject": "Article Draft Due",
-    "body": "Just a reminder that your draft for the 'Future of Python' article is due this Wednesday. Let me know if you need an extension.",
-    "timestamp": "2023-11-19T15:45:00Z"
+    "sender": "engineering@company.com",
+    "subject": "User Authentication - Sprint Review",
+    "body": "Sprint 14 has been completed!\n\nCompleted Items:\n- Q4 Planning\n- Client Review\n\nCarried Over:\n- Security Update\n\nNext sprint starts Nov 26.",
+    "timestamp": "2023-11-19T05:07:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 12,
-    "sender": "finance@company.com",
-    "subject": "Invoice #4029 Approval",
-    "body": "Please review and approve the attached invoice for software licenses. Due date: Tomorrow. It is pending your sign-off.",
-    "timestamp": "2023-11-21T16:20:00Z"
+    "sender": "notifications@company.com",
+    "subject": "[Backup] Notification",
+    "body": "System: Backup\nStatus: Success\nTime: 10:00 PM\nDetails: System performing normally. No action required.\n\nAction required: Update config",
+    "timestamp": "2023-11-19T03:34:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 13,
-    "sender": "jira-bot@company.com",
-    "subject": "[JIRA] Update on PROJ-123",
-    "body": "User 'mscott' updated status of PROJ-123 to 'In Progress'. Comment: Started working on the backend API endpoints.",
-    "timestamp": "2023-11-22T10:05:00Z"
+    "sender": "notifications@company.com",
+    "subject": "[CI/CD] Notification",
+    "body": "System: CI/CD\nStatus: Success\nTime: 13:00 AM\nDetails: System performing normally. No action required.\n\nAction required: Review logs",
+    "timestamp": "2023-11-18T15:08:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 14,
-    "sender": "team-lead@company.com",
-    "subject": "Frontend Refactor Status",
-    "body": "The frontend refactor is 80% complete. We are on track to merge by Friday. Great work team! Please test the staging build.",
-    "timestamp": "2023-11-21T17:00:00Z"
+    "sender": "notifications@company.com",
+    "subject": "[API Gateway] Warning",
+    "body": "System: API Gateway\nStatus: Error\nTime: 15:00 PM\nDetails: System performing normally. No action required.\n\nAction required: Monitor metrics",
+    "timestamp": "2023-11-18T12:31:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
   },
   {
     "id": 15,
-    "sender": "devops@company.com",
-    "subject": "Deployment Successful: v2.1.0",
-    "body": "Release v2.1.0 has been successfully deployed to production. Monitoring for any anomalies. Logs are available in the dashboard.",
-    "timestamp": "2023-11-22T11:30:00Z"
+    "sender": "newsletter@medium.com",
+    "subject": "Tech Weekly - Weekly Digest",
+    "body": "Your weekly roundup of Q4 Planning news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Team Sync\n2. Security Update\n3. Client Review\n\nTrending: Code Review",
+    "timestamp": "2023-11-18T08:57:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 16,
+    "sender": "promo@linkedin.xyz",
+    "subject": "FINAL NOTICE 82% OFF - Security Tools",
+    "body": "This offer expires soon!\n\nSecurity Tools now available at 82% discount!\n\nDon't miss out! Act now!\n\nClick here now!",
+    "timestamp": "2023-11-18T02:49:00Z",
+    "category": "Spam",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 17,
+    "sender": "promo@linkedin.xyz",
+    "subject": "LIMITED TIME 64% OFF - Cloud Storage",
+    "body": "This offer expires soon!\n\nCloud Storage now available at 64% discount!\n\nDon't miss out! Act now!\n\nClick here now!",
+    "timestamp": "2023-11-17T09:18:00Z",
+    "category": "Spam",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 18,
+    "sender": "datadynamics@client.com",
+    "subject": "Re: Code Review",
+    "body": "Hi,\n\nThanks for your message about Code Review. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nEmily Davis",
+    "timestamp": "2023-11-17T06:59:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 19,
+    "sender": "notifications@company.com",
+    "subject": "[Database] Notification",
+    "body": "System: Database\nStatus: Info\nTime: 12:00 PM\nDetails: System performing normally. No action required.\n\nAction required: Monitor metrics",
+    "timestamp": "2023-11-17T05:10:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 20,
+    "sender": "team.lead@company.com",
+    "subject": "Sync Meeting: Performance Review",
+    "body": "Hi team,\n\nLet's sync up on Performance Review. I've scheduled a meeting for Nov 26 at 16:00 PM in Remote.\n\nTopics to cover:\n- Product Roadmap\n- Performance Review\n- Q&A\n\nSee you there!",
+    "timestamp": "2023-11-17T03:45:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 21,
+    "sender": "newsletter@hacknews.com",
+    "subject": "Dev Digest - Weekly Digest",
+    "body": "Your weekly roundup of Product Roadmap news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Budget Discussion\n2. Q4 Planning\n3. Q4 Planning\n\nTrending: Budget Discussion",
+    "timestamp": "2023-11-17T02:33:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 22,
+    "sender": "acmecorp@client.com",
+    "subject": "Re: Client Review",
+    "body": "Hi,\n\nThanks for your message about Client Review. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nSarah Johnson",
+    "timestamp": "2023-11-16T02:38:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 23,
+    "sender": "project.manager@company.com",
+    "subject": "Project Update: Customer Portal",
+    "body": "Status update on Customer Portal:\n\nProgress: 80%\nMilestones: Completed\nRisks: Resource constraints\nNext Steps: Deploy to staging\n\nPlease review and provide feedback.",
+    "timestamp": "2023-11-16T01:18:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 24,
+    "sender": "team.lead@company.com",
+    "subject": "Sync Meeting: Budget Discussion",
+    "body": "Hi team,\n\nLet's sync up on Budget Discussion. I've scheduled a meeting for Nov 29 at 15:00 AM in Cafeteria.\n\nTopics to cover:\n- Performance Review\n- Team Sync\n- Q&A\n\nSee you there!",
+    "timestamp": "2023-11-15T21:21:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 25,
+    "sender": "engineering@company.com",
+    "subject": "API Integration - Sprint Review",
+    "body": "Sprint 20 has been completed!\n\nCompleted Items:\n- Product Roadmap\n- Code Review\n\nCarried Over:\n- Training Session\n\nNext sprint starts Nov 27.",
+    "timestamp": "2023-11-15T17:54:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 26,
+    "sender": "newsletter@devto.com",
+    "subject": "Tech Weekly - Weekly Digest",
+    "body": "Your weekly roundup of Performance Review news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Security Update\n2. Budget Discussion\n3. Performance Review\n\nTrending: Security Update",
+    "timestamp": "2023-11-15T12:49:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 27,
+    "sender": "innovateco@client.com",
+    "subject": "Re: Team Sync",
+    "body": "Hi,\n\nThanks for your message about Team Sync. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nJohn Smith",
+    "timestamp": "2023-11-15T04:31:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 28,
+    "sender": "cloudfirst@client.com",
+    "subject": "Re: Q4 Planning",
+    "body": "Hi,\n\nThanks for your message about Q4 Planning. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nMichael Chen",
+    "timestamp": "2023-11-15T00:57:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 29,
+    "sender": "innovateco@client.com",
+    "subject": "Re: Client Review",
+    "body": "Hi,\n\nThanks for your message about Client Review. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nDavid Wilson",
+    "timestamp": "2023-11-14T21:06:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 30,
+    "sender": "newsletter@github.com",
+    "subject": "Industry News - Weekly Digest",
+    "body": "Your weekly roundup of Security Update news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Training Session\n2. Q4 Planning\n3. Feature Launch\n\nTrending: Team Sync",
+    "timestamp": "2023-11-14T14:49:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 31,
+    "sender": "newsletter@devto.com",
+    "subject": "Product Updates - Weekly Digest",
+    "body": "Your weekly roundup of Training Session news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Feature Launch\n2. Feature Launch\n3. Team Sync\n\nTrending: Product Roadmap",
+    "timestamp": "2023-11-14T10:52:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 32,
+    "sender": "calendar@company.com",
+    "subject": "Meeting Invitation: Team Sync",
+    "body": "You've been invited to a meeting about Team Sync.\n\nDate: Nov 24\nTime: 11:00 PM\nLocation: Online\n\nAgenda:\n- Team Sync\n- Product Roadmap\n- Q&A\n\nPlease confirm your attendance.",
+    "timestamp": "2023-11-14T06:47:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 33,
+    "sender": "techstart@client.com",
+    "subject": "Re: Product Roadmap",
+    "body": "Hi,\n\nThanks for your message about Product Roadmap. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nDavid Wilson",
+    "timestamp": "2023-11-14T05:57:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 34,
+    "sender": "team.lead@company.com",
+    "subject": "Sync Meeting: Client Review",
+    "body": "Hi team,\n\nLet's sync up on Client Review. I've scheduled a meeting for Nov 25 at 14:00 PM in Main Office.\n\nTopics to cover:\n- Client Review\n- Performance Review\n- Q&A\n\nSee you there!",
+    "timestamp": "2023-11-14T02:48:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 35,
+    "sender": "techstart@client.com",
+    "subject": "Re: Security Update",
+    "body": "Hi,\n\nThanks for your message about Security Update. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nJohn Smith",
+    "timestamp": "2023-11-13T21:05:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 36,
+    "sender": "team.lead@company.com",
+    "subject": "Sync Meeting: Feature Launch",
+    "body": "Hi team,\n\nLet's sync up on Feature Launch. I've scheduled a meeting for Nov 25 at 16:00 AM in Main Office.\n\nTopics to cover:\n- Performance Review\n- Feature Launch\n- Q&A\n\nSee you there!",
+    "timestamp": "2023-11-13T14:10:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 37,
+    "sender": "promo@techcrunch.xyz",
+    "subject": "LIMITED TIME 67% OFF - Software Suite",
+    "body": "This offer expires soon!\n\nSoftware Suite now available at 67% discount!\n\nDon't miss out! Act now!\n\nClick here now!",
+    "timestamp": "2023-11-13T07:39:00Z",
+    "category": "Spam",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 38,
+    "sender": "calendar@company.com",
+    "subject": "Meeting Invitation: Team Sync",
+    "body": "You've been invited to a meeting about Team Sync.\n\nDate: Nov 30\nTime: 15:00 PM\nLocation: Remote\n\nAgenda:\n- Product Roadmap\n- Budget Discussion\n- Q&A\n\nPlease confirm your attendance.",
+    "timestamp": "2023-11-13T02:03:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 39,
+    "sender": "calendar@company.com",
+    "subject": "Meeting Invitation: Feature Launch",
+    "body": "You've been invited to a meeting about Feature Launch.\n\nDate: Nov 30\nTime: 10:00 AM\nLocation: Board Room\n\nAgenda:\n- Security Update\n- Code Review\n- Q&A\n\nPlease confirm your attendance.",
+    "timestamp": "2023-11-13T01:29:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 40,
+    "sender": "newsletter@devto.com",
+    "subject": "Product Updates - Weekly Digest",
+    "body": "Your weekly roundup of Feature Launch news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Feature Launch\n2. Product Roadmap\n3. Feature Launch\n\nTrending: Code Review",
+    "timestamp": "2023-11-12T06:18:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 41,
+    "sender": "datadynamics@client.com",
+    "subject": "Re: Q4 Planning",
+    "body": "Hi,\n\nThanks for your message about Q4 Planning. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nEmily Davis",
+    "timestamp": "2023-11-11T23:55:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 42,
+    "sender": "engineering@company.com",
+    "subject": "Search Engine - Sprint Review",
+    "body": "Sprint 16 has been completed!\n\nCompleted Items:\n- Security Update\n- Performance Review\n\nCarried Over:\n- Training Session\n\nNext sprint starts Nov 23.",
+    "timestamp": "2023-11-11T18:54:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 43,
+    "sender": "calendar@company.com",
+    "subject": "Meeting Invitation: Team Sync",
+    "body": "You've been invited to a meeting about Team Sync.\n\nDate: Nov 20\nTime: 16:00 PM\nLocation: Cafeteria\n\nAgenda:\n- Client Review\n- Product Roadmap\n- Q&A\n\nPlease confirm your attendance.",
+    "timestamp": "2023-11-11T11:04:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 44,
+    "sender": "techstart@client.com",
+    "subject": "Re: Performance Review",
+    "body": "Hi,\n\nThanks for your message about Performance Review. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nSarah Johnson",
+    "timestamp": "2023-11-11T05:04:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 45,
+    "sender": "notifications@company.com",
+    "subject": "[Production] Notification",
+    "body": "System: Production\nStatus: Error\nTime: 13:00 PM\nDetails: System performing normally. No action required.\n\nAction required: None",
+    "timestamp": "2023-11-10T20:07:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 46,
+    "sender": "newsletter@stackoverflow.com",
+    "subject": "Product Updates - Weekly Digest",
+    "body": "Your weekly roundup of Q4 Planning news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Product Roadmap\n2. Code Review\n3. Feature Launch\n\nTrending: Code Review",
+    "timestamp": "2023-11-10T17:50:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 47,
+    "sender": "notifications@company.com",
+    "subject": "[CI/CD] Alert",
+    "body": "System: CI/CD\nStatus: Info\nTime: 17:00 AM\nDetails: System performing normally. No action required.\n\nAction required: Monitor metrics",
+    "timestamp": "2023-11-10T16:09:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 48,
+    "sender": "project.manager@company.com",
+    "subject": "Project Update: Cloud Infrastructure",
+    "body": "Status update on Cloud Infrastructure:\n\nProgress: 53%\nMilestones: Completed\nRisks: None\nNext Steps: Continue development\n\nPlease review and provide feedback.",
+    "timestamp": "2023-11-10T04:30:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 49,
+    "sender": "notifications@company.com",
+    "subject": "[Security] Alert",
+    "body": "System: Security\nStatus: Error\nTime: 11:00 PM\nDetails: System performing normally. No action required.\n\nAction required: Review logs",
+    "timestamp": "2023-11-10T02:12:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 50,
+    "sender": "engineering@company.com",
+    "subject": "Customer Portal - Sprint Review",
+    "body": "Sprint 10 has been completed!\n\nCompleted Items:\n- Training Session\n- Q4 Planning\n\nCarried Over:\n- Training Session\n\nNext sprint starts Nov 28.",
+    "timestamp": "2023-11-10T01:20:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 51,
+    "sender": "engineering@company.com",
+    "subject": "Customer Portal - Sprint Review",
+    "body": "Sprint 10 has been completed!\n\nCompleted Items:\n- Performance Review\n- Product Roadmap\n\nCarried Over:\n- Client Review\n\nNext sprint starts Nov 23.",
+    "timestamp": "2023-11-09T20:40:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 52,
+    "sender": "project.manager@company.com",
+    "subject": "Project Update: Database Migration",
+    "body": "Status update on Database Migration:\n\nProgress: 61%\nMilestones: On Track\nRisks: None\nNext Steps: Deploy to staging\n\nPlease review and provide feedback.",
+    "timestamp": "2023-11-09T04:15:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 53,
+    "sender": "newsletter@techcrunch.com",
+    "subject": "Industry News - Weekly Digest",
+    "body": "Your weekly roundup of Team Sync news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Product Roadmap\n2. Team Sync\n3. Performance Review\n\nTrending: Team Sync",
+    "timestamp": "2023-11-09T02:54:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 54,
+    "sender": "newsletter@techcrunch.com",
+    "subject": "Industry News - Weekly Digest",
+    "body": "Your weekly roundup of Budget Discussion news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Q4 Planning\n2. Security Update\n3. Client Review\n\nTrending: Q4 Planning",
+    "timestamp": "2023-11-08T12:27:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 55,
+    "sender": "team.lead@company.com",
+    "subject": "Sync Meeting: Feature Launch",
+    "body": "Hi team,\n\nLet's sync up on Feature Launch. I've scheduled a meeting for Nov 30 at 12:00 PM in Conference Room A.\n\nTopics to cover:\n- Client Review\n- Team Sync\n- Q&A\n\nSee you there!",
+    "timestamp": "2023-11-08T09:53:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 56,
+    "sender": "team.lead@company.com",
+    "subject": "Sync Meeting: Training Session",
+    "body": "Hi team,\n\nLet's sync up on Training Session. I've scheduled a meeting for Nov 30 at 16:00 AM in Cafeteria.\n\nTopics to cover:\n- Feature Launch\n- Training Session\n- Q&A\n\nSee you there!",
+    "timestamp": "2023-11-08T00:21:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 57,
+    "sender": "engineering@company.com",
+    "subject": "Customer Portal - Sprint Review",
+    "body": "Sprint 16 has been completed!\n\nCompleted Items:\n- Client Review\n- Feature Launch\n\nCarried Over:\n- Code Review\n\nNext sprint starts Nov 23.",
+    "timestamp": "2023-11-07T13:27:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 58,
+    "sender": "engineering@company.com",
+    "subject": "User Authentication - Sprint Review",
+    "body": "Sprint 25 has been completed!\n\nCompleted Items:\n- Performance Review\n- Feature Launch\n\nCarried Over:\n- Product Roadmap\n\nNext sprint starts Nov 27.",
+    "timestamp": "2023-11-07T13:14:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 59,
+    "sender": "team.lead@company.com",
+    "subject": "Sync Meeting: Performance Review",
+    "body": "Hi team,\n\nLet's sync up on Performance Review. I've scheduled a meeting for Nov 30 at 17:00 AM in Remote.\n\nTopics to cover:\n- Feature Launch\n- Performance Review\n- Q&A\n\nSee you there!",
+    "timestamp": "2023-11-07T12:38:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 60,
+    "sender": "calendar@company.com",
+    "subject": "Meeting Invitation: Budget Discussion",
+    "body": "You've been invited to a meeting about Budget Discussion.\n\nDate: Nov 30\nTime: 10:00 AM\nLocation: Main Office\n\nAgenda:\n- Client Review\n- Code Review\n- Q&A\n\nPlease confirm your attendance.",
+    "timestamp": "2023-11-06T23:15:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 61,
+    "sender": "engineering@company.com",
+    "subject": "Payment System - Sprint Review",
+    "body": "Sprint 25 has been completed!\n\nCompleted Items:\n- Code Review\n- Team Sync\n\nCarried Over:\n- Team Sync\n\nNext sprint starts Nov 20.",
+    "timestamp": "2023-11-06T22:40:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 62,
+    "sender": "notifications@company.com",
+    "subject": "[CI/CD] Update",
+    "body": "System: CI/CD\nStatus: Error\nTime: 17:00 AM\nDetails: System performing normally. No action required.\n\nAction required: None",
+    "timestamp": "2023-11-05T07:01:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 63,
+    "sender": "team.lead@company.com",
+    "subject": "Sync Meeting: Code Review",
+    "body": "Hi team,\n\nLet's sync up on Code Review. I've scheduled a meeting for Nov 23 at 16:00 AM in Conference Room A.\n\nTopics to cover:\n- Performance Review\n- Q4 Planning\n- Q&A\n\nSee you there!",
+    "timestamp": "2023-11-05T02:45:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 64,
+    "sender": "notifications@company.com",
+    "subject": "[Monitoring] Alert",
+    "body": "System: Monitoring\nStatus: Warning\nTime: 15:00 PM\nDetails: System performing normally. No action required.\n\nAction required: Review logs",
+    "timestamp": "2023-11-05T00:11:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 65,
+    "sender": "innovateco@client.com",
+    "subject": "Re: Security Update",
+    "body": "Hi,\n\nThanks for your message about Security Update. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nJohn Smith",
+    "timestamp": "2023-11-03T21:08:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 66,
+    "sender": "engineering@company.com",
+    "subject": "Analytics Dashboard - Sprint Review",
+    "body": "Sprint 20 has been completed!\n\nCompleted Items:\n- Feature Launch\n- Code Review\n\nCarried Over:\n- Feature Launch\n\nNext sprint starts Nov 24.",
+    "timestamp": "2023-11-03T08:37:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 67,
+    "sender": "project.manager@company.com",
+    "subject": "Project Update: Database Migration",
+    "body": "Status update on Database Migration:\n\nProgress: 41%\nMilestones: At Risk\nRisks: None\nNext Steps: Testing phase\n\nPlease review and provide feedback.",
+    "timestamp": "2023-11-03T05:44:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 68,
+    "sender": "project.manager@company.com",
+    "subject": "Project Update: Database Migration",
+    "body": "Status update on Database Migration:\n\nProgress: 75%\nMilestones: Completed\nRisks: Resource constraints\nNext Steps: Testing phase\n\nPlease review and provide feedback.",
+    "timestamp": "2023-11-01T23:54:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 69,
+    "sender": "notifications@company.com",
+    "subject": "[Database] Update",
+    "body": "System: Database\nStatus: Success\nTime: 14:00 AM\nDetails: System performing normally. No action required.\n\nAction required: Monitor metrics",
+    "timestamp": "2023-11-01T17:16:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 70,
+    "sender": "newsletter@medium.com",
+    "subject": "Industry News - Weekly Digest",
+    "body": "Your weekly roundup of Code Review news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Team Sync\n2. Feature Launch\n3. Team Sync\n\nTrending: Performance Review",
+    "timestamp": "2023-11-01T16:02:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 71,
+    "sender": "notifications@company.com",
+    "subject": "[API Gateway] Alert",
+    "body": "System: API Gateway\nStatus: Error\nTime: 11:00 PM\nDetails: System performing normally. No action required.\n\nAction required: None",
+    "timestamp": "2023-11-01T09:55:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 72,
+    "sender": "project.manager@company.com",
+    "subject": "Project Update: Customer Portal",
+    "body": "Status update on Customer Portal:\n\nProgress: 88%\nMilestones: Completed\nRisks: Dependencies\nNext Steps: Deploy to staging\n\nPlease review and provide feedback.",
+    "timestamp": "2023-11-01T01:30:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 73,
+    "sender": "newsletter@hacknews.com",
+    "subject": "Industry News - Weekly Digest",
+    "body": "Your weekly roundup of Security Update news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Performance Review\n2. Client Review\n3. Budget Discussion\n\nTrending: Q4 Planning",
+    "timestamp": "2023-11-01T00:21:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 74,
+    "sender": "notifications@company.com",
+    "subject": "[Security] Warning",
+    "body": "System: Security\nStatus: Success\nTime: 14:00 AM\nDetails: System performing normally. No action required.\n\nAction required: Monitor metrics",
+    "timestamp": "2023-10-31T22:23:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 75,
+    "sender": "notifications@company.com",
+    "subject": "[Security] Alert",
+    "body": "System: Security\nStatus: Info\nTime: 11:00 PM\nDetails: System performing normally. No action required.\n\nAction required: Monitor metrics",
+    "timestamp": "2023-10-31T16:09:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 76,
+    "sender": "calendar@company.com",
+    "subject": "Meeting Invitation: Code Review",
+    "body": "You've been invited to a meeting about Code Review.\n\nDate: Nov 23\nTime: 16:00 PM\nLocation: Cafeteria\n\nAgenda:\n- Budget Discussion\n- Budget Discussion\n- Q&A\n\nPlease confirm your attendance.",
+    "timestamp": "2023-10-31T06:35:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 77,
+    "sender": "project.manager@company.com",
+    "subject": "Project Update: Analytics Dashboard",
+    "body": "Status update on Analytics Dashboard:\n\nProgress: 67%\nMilestones: At Risk\nRisks: Dependencies\nNext Steps: Deploy to staging\n\nPlease review and provide feedback.",
+    "timestamp": "2023-10-31T01:13:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 78,
+    "sender": "cloudfirst@client.com",
+    "subject": "Re: Security Update",
+    "body": "Hi,\n\nThanks for your message about Security Update. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nSarah Johnson",
+    "timestamp": "2023-10-30T20:38:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 79,
+    "sender": "acmecorp@client.com",
+    "subject": "Re: Budget Discussion",
+    "body": "Hi,\n\nThanks for your message about Budget Discussion. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nSarah Johnson",
+    "timestamp": "2023-10-29T07:39:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 80,
+    "sender": "newsletter@hacknews.com",
+    "subject": "Dev Digest - Weekly Digest",
+    "body": "Your weekly roundup of Budget Discussion news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Q4 Planning\n2. Budget Discussion\n3. Budget Discussion\n\nTrending: Feature Launch",
+    "timestamp": "2023-10-29T07:03:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 81,
+    "sender": "engineering@company.com",
+    "subject": "Frontend Redesign - Sprint Review",
+    "body": "Sprint 17 has been completed!\n\nCompleted Items:\n- Product Roadmap\n- Client Review\n\nCarried Over:\n- Performance Review\n\nNext sprint starts Nov 29.",
+    "timestamp": "2023-10-29T04:49:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 82,
+    "sender": "engineering@company.com",
+    "subject": "Mobile App - Sprint Review",
+    "body": "Sprint 21 has been completed!\n\nCompleted Items:\n- Performance Review\n- Performance Review\n\nCarried Over:\n- Client Review\n\nNext sprint starts Nov 26.",
+    "timestamp": "2023-10-28T17:48:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 83,
+    "sender": "promo@techcrunch.xyz",
+    "subject": "LAST CHANCE 54% OFF - Software Suite",
+    "body": "This offer expires soon!\n\nSoftware Suite now available at 54% discount!\n\nDon't miss out! Act now!\n\nClick here now!",
+    "timestamp": "2023-10-27T10:21:00Z",
+    "category": "Spam",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 84,
+    "sender": "notifications@company.com",
+    "subject": "[Security] Notification",
+    "body": "System: Security\nStatus: Warning\nTime: 11:00 AM\nDetails: System performing normally. No action required.\n\nAction required: Update config",
+    "timestamp": "2023-10-27T07:28:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 85,
+    "sender": "notifications@company.com",
+    "subject": "[Backup] Update",
+    "body": "System: Backup\nStatus: Error\nTime: 13:00 AM\nDetails: System performing normally. No action required.\n\nAction required: Monitor metrics",
+    "timestamp": "2023-10-26T05:42:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 86,
+    "sender": "acmecorp@client.com",
+    "subject": "Re: Security Update",
+    "body": "Hi,\n\nThanks for your message about Security Update. I've reviewed your request and have some updates to share.\n\nSystem performing normally. No action required.\n\nLooking forward to your response.\n\nBest,\nDavid Wilson",
+    "timestamp": "2023-10-26T00:36:00Z",
+    "category": "Client Communication",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 87,
+    "sender": "team.lead@company.com",
+    "subject": "Sync Meeting: Performance Review",
+    "body": "Hi team,\n\nLet's sync up on Performance Review. I've scheduled a meeting for Nov 27 at 16:00 AM in Remote.\n\nTopics to cover:\n- Product Roadmap\n- Budget Discussion\n- Q&A\n\nSee you there!",
+    "timestamp": "2023-10-25T08:53:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 88,
+    "sender": "team.lead@company.com",
+    "subject": "Sync Meeting: Budget Discussion",
+    "body": "Hi team,\n\nLet's sync up on Budget Discussion. I've scheduled a meeting for Nov 28 at 9:00 PM in Conference Room A.\n\nTopics to cover:\n- Budget Discussion\n- Budget Discussion\n- Q&A\n\nSee you there!",
+    "timestamp": "2023-10-24T19:48:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 89,
+    "sender": "promo@medium.xyz",
+    "subject": "URGENT 58% OFF - Cloud Storage",
+    "body": "This offer expires soon!\n\nCloud Storage now available at 58% discount!\n\nDon't miss out! Act now!\n\nClick here now!",
+    "timestamp": "2023-10-24T13:23:00Z",
+    "category": "Spam",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 90,
+    "sender": "newsletter@devto.com",
+    "subject": "Product Updates - Weekly Digest",
+    "body": "Your weekly roundup of Performance Review news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Training Session\n2. Q4 Planning\n3. Client Review\n\nTrending: Performance Review",
+    "timestamp": "2023-10-24T11:52:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 91,
+    "sender": "notifications@company.com",
+    "subject": "[CI/CD] Update",
+    "body": "System: CI/CD\nStatus: Warning\nTime: 15:00 AM\nDetails: System performing normally. No action required.\n\nAction required: Monitor metrics",
+    "timestamp": "2023-10-24T06:36:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 92,
+    "sender": "notifications@company.com",
+    "subject": "[Backup] Update",
+    "body": "System: Backup\nStatus: Info\nTime: 12:00 AM\nDetails: System performing normally. No action required.\n\nAction required: None",
+    "timestamp": "2023-10-24T04:39:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 93,
+    "sender": "project.manager@company.com",
+    "subject": "Project Update: Frontend Redesign",
+    "body": "Status update on Frontend Redesign:\n\nProgress: 68%\nMilestones: In Progress\nRisks: Minor delays\nNext Steps: Testing phase\n\nPlease review and provide feedback.",
+    "timestamp": "2023-10-23T23:23:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 94,
+    "sender": "project.manager@company.com",
+    "subject": "Project Update: Customer Portal",
+    "body": "Status update on Customer Portal:\n\nProgress: 66%\nMilestones: On Track\nRisks: Dependencies\nNext Steps: Testing phase\n\nPlease review and provide feedback.",
+    "timestamp": "2023-10-23T18:43:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 95,
+    "sender": "engineering@company.com",
+    "subject": "Payment System - Sprint Review",
+    "body": "Sprint 24 has been completed!\n\nCompleted Items:\n- Q4 Planning\n- Product Roadmap\n\nCarried Over:\n- Budget Discussion\n\nNext sprint starts Nov 21.",
+    "timestamp": "2023-10-23T10:03:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 96,
+    "sender": "notifications@company.com",
+    "subject": "[Backup] Update",
+    "body": "System: Backup\nStatus: Info\nTime: 10:00 AM\nDetails: System performing normally. No action required.\n\nAction required: Monitor metrics",
+    "timestamp": "2023-10-23T04:43:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 97,
+    "sender": "team.lead@company.com",
+    "subject": "Sync Meeting: Product Roadmap",
+    "body": "Hi team,\n\nLet's sync up on Product Roadmap. I've scheduled a meeting for Nov 29 at 12:00 AM in Remote.\n\nTopics to cover:\n- Performance Review\n- Product Roadmap\n- Q&A\n\nSee you there!",
+    "timestamp": "2023-10-23T03:26:00Z",
+    "category": "Meeting",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 98,
+    "sender": "newsletter@medium.com",
+    "subject": "Industry News - Weekly Digest",
+    "body": "Your weekly roundup of Training Session news:\n\nLatest developments in technology and industry news.\n\nTop stories:\n1. Client Review\n2. Product Roadmap\n3. Q4 Planning\n\nTrending: Budget Discussion",
+    "timestamp": "2023-10-23T00:54:00Z",
+    "category": "Newsletter",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 99,
+    "sender": "notifications@company.com",
+    "subject": "[API Gateway] Notification",
+    "body": "System: API Gateway\nStatus: Error\nTime: 12:00 AM\nDetails: System performing normally. No action required.\n\nAction required: Monitor metrics",
+    "timestamp": "2023-10-22T06:35:00Z",
+    "category": "Notification",
+    "is_starred": false,
+    "is_read": false
+  },
+  {
+    "id": 100,
+    "sender": "project.manager@company.com",
+    "subject": "Project Update: Search Engine",
+    "body": "Status update on Search Engine:\n\nProgress: 55%\nMilestones: Completed\nRisks: Resource constraints\nNext Steps: Continue development\n\nPlease review and provide feedback.",
+    "timestamp": "2023-10-22T04:36:00Z",
+    "category": "Project Update",
+    "is_starred": false,
+    "is_read": false
   }
 ]

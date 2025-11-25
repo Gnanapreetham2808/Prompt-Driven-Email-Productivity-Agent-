@@ -122,6 +122,7 @@ kiwisolver==1.4.7
 Levenshtein==0.27.1
 libclang==18.1.1
 lxml==6.0.2
+mangum==0.19.0
 Markdown==3.9
 markdown-it-py==3.0.0
 MarkupSafe==3.0.2
@@ -178,8 +179,8 @@ pyasn1==0.6.1
 pyasn1_modules==0.4.1
 pycparser==2.22
 pycryptodomex==3.23.0
-pydantic==2.5.3
-pydantic_core==2.14.6
+pydantic==2.12.4
+pydantic_core==2.41.5
 pydeck==0.9.1
 Pygments==2.18.0
 PyJWT==2.10.1
