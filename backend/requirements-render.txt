@@ -36,7 +36,7 @@ pydantic-core==2.41.5
 
 # Utilities
 python-dateutil==2.9.0.post0
-typing-extensions==4.12.2
+typing-extensions>=4.14.1
 annotated-types==0.7.0
 anyio==4.6.2.post1
 sniffio==1.3.1
