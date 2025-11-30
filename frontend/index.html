@@ -203,11 +203,11 @@
                                     </div>
                                     <div class="p-3 flex-1 flex flex-col gap-3 overflow-y-auto">
                                         <div>
-                                            <label class="block text-xs text-gray-400 font-medium mb-1">Subject</label>
-                                            <input type="text" id="draft-subject" class="w-full text-sm font-medium text-slate-800 border-b border-gray-200 pb-1 focus:outline-none focus:border-blue-400 placeholder-gray-300" placeholder="Subject line...">
+                                            <label class="block text-xs text-gray-400 font-medium mb-1">Subject (Auto-generated)</label>
+                                            <input type="text" id="draft-subject" readonly class="w-full text-sm font-medium text-slate-600 bg-gray-50 border-b border-gray-200 pb-1 focus:outline-none placeholder-gray-300" placeholder="Will be auto-generated as Re: ...">
                                         </div>
                                         <div class="flex-1">
-                                            <label class="block text-xs text-gray-400 font-medium mb-1">Body</label>
+                                            <label class="block text-xs text-gray-400 font-medium mb-1">Reply Message</label>
                                             <textarea id="draft-body" class="w-full h-full resize-none text-sm text-slate-600 leading-relaxed focus:outline-none placeholder-gray-300 font-mono" placeholder="Generated draft will appear here..."></textarea>
                                         </div>
                                     </div>
@@ -700,13 +700,21 @@
 
         // --- Draft Logic ---
         async function generateDraft() {
-            if (!currentEmailId) return;
+            if (!currentEmailId) {
+                showToast('Please select an email first', 'error');
+                return;
+            }
+            
             const btn = document.getElementById('btn-gen-draft');
+            if (!btn) return;
+            
             const icon = btn.querySelector('i');
             
             // Loading UI
-            icon.classList.remove('lucide-sparkles');
-            icon.classList.add('lucide-loader-2', 'animate-spin');
+            if (icon) {
+                icon.classList.remove('lucide-sparkles');
+                icon.classList.add('lucide-loader-2', 'animate-spin');
+            }
             btn.disabled = true;
             btn.classList.add('opacity-50');
 
@@ -716,21 +724,39 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email_id: currentEmailId, language: selectedLanguage })
                 });
+                
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    console.error('Draft generation error:', errorData);
+                    showToast(`Failed: ${errorData.detail || 'Unknown error'}`, 'error');
+                    return;
+                }
+                
                 const data = await res.json();
                 
                 if (data.draft) {
-                    document.getElementById('draft-subject').value = data.draft.draft_subject;
-                    document.getElementById('draft-body').value = data.draft.draft_body;
+                    document.getElementById('draft-subject').value = data.draft.draft_subject || 'Re: Your Email';
+                    document.getElementById('draft-body').value = data.draft.draft_body || 'No draft generated';
                     showToast('Draft generated successfully');
+                } else {
+                    showToast('No draft data received', 'error');
                 }
             } catch (err) {
-                showToast('Failed to generate draft', 'error');
+                console.error('Draft generation error:', err);
+                showToast(`Failed to generate draft: ${err.message}`, 'error');
             } finally {
                 // Reset UI
-                icon.classList.add('lucide-sparkles');
-                icon.classList.remove('lucide-loader-2', 'animate-spin');
-                btn.disabled = false;
-                btn.classList.remove('opacity-50');
+                const btn = document.getElementById('btn-gen-draft');
+                const icon = btn ? btn.querySelector('i') : null;
+                
+                if (icon) {
+                    icon.classList.add('lucide-sparkles');
+                    icon.classList.remove('lucide-loader-2', 'animate-spin');
+                }
+                if (btn) {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50');
+                }
                 lucide.createIcons();
             }
         }

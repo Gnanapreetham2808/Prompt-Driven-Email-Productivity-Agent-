@@ -22,7 +22,7 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Initialize Clients
-# Note: In a real production app, you might want to handle missing env vars more gracefully
+
 if not SUPABASE_URL or not SUPABASE_KEY:
     print("Warning: SUPABASE_URL or SUPABASE_KEY not set.")
     supabase: Client = None # type: ignore
@@ -713,14 +713,15 @@ async def generate_draft(request: DraftRequest):
                 system_instruction = prompt_res.data[0]['content']
 
         # 3. Call OpenAI
-        language_instruction = "" if not request.language or request.language.lower() in ["en", "english"] else f"Write the subject and body in {request.language}."
+        language_instruction = "" if not request.language or request.language.lower() in ["en", "english"] else f"Write the reply in {request.language}."
         system_prompt = f"""
         {system_instruction}
         {language_instruction}
         
-        Output Format: Return a valid JSON object with exactly these keys:
-        - "draft_subject": string
-        - "draft_body": string
+        Generate a direct reply to the email below. Write ONLY the reply message body - do not include greetings like "Dear X" unless the original email was very formal. Keep it concise and natural.
+        
+        Output Format: Return a valid JSON object with exactly this key:
+        - "draft_body": string (the complete reply message)
         """
 
         completion = openai_client.chat.completions.create(
@@ -734,6 +735,13 @@ async def generate_draft(request: DraftRequest):
 
         draft_content = completion.choices[0].message.content
         draft_json = json.loads(draft_content)
+        
+        # Auto-generate subject as "Re: [original subject]"
+        original_subject = email.get('subject', 'Your Email')
+        if not original_subject.lower().startswith('re:'):
+            draft_json['draft_subject'] = f"Re: {original_subject}"
+        else:
+            draft_json['draft_subject'] = original_subject
 
         # 4. Insert into drafts table (only if email was from database)
         draft_data = {
